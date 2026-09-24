@@ -1,0 +1,14 @@
+**/target/
+**/.flattened-pom.xml
+.idea/
+*.iml
+.vscode/
+*.log
+.env
+.env.*
+!*.example
+**/application-local.yaml
+**/application-dev.yaml
+*.pem
+*.key
+.verification/

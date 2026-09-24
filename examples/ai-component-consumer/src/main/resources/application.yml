@@ -1,0 +1,16 @@
+server:
+  port: 0
+
+ai-chat-kit:
+  ai:
+    engine:
+      enabled: false
+    web:
+      enabled: true
+    storage:
+      type: postgresql
+      jdbc:
+        mode: isolated
+    mcp-jwt-v1:
+      authorization-enabled: true
+      signing-enabled: true

@@ -1,0 +1,764 @@
+[
+  {
+    "Coordinate": "ch.qos.logback:logback-classic:1.2.12",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Eclipse Public License - v 1.0",
+        "Url": "http://www.eclipse.org/legal/epl-v10.html",
+        "DeclaredIn": "ch.qos.logback:logback-parent:1.2.12"
+      },
+      {
+        "Name": "GNU Lesser General Public License",
+        "Url": "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html",
+        "DeclaredIn": "ch.qos.logback:logback-parent:1.2.12"
+      }
+    ],
+    "JarSha256": "F65352BF627177E414C956A977A5851E7125E9F3A2E1A7847B2FA78182DC49FE",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "ch.qos.logback:logback-core:1.2.12",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Eclipse Public License - v 1.0",
+        "Url": "http://www.eclipse.org/legal/epl-v10.html",
+        "DeclaredIn": "ch.qos.logback:logback-parent:1.2.12"
+      },
+      {
+        "Name": "GNU Lesser General Public License",
+        "Url": "http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html",
+        "DeclaredIn": "ch.qos.logback:logback-parent:1.2.12"
+      }
+    ],
+    "JarSha256": "0CBA0755FBDC1793F60DC9D1EF22337737899F4F28B485C42BCADACB73664B34",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "com.fasterxml:classmate:1.5.1",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.fasterxml:classmate:1.5.1"
+      }
+    ],
+    "JarSha256": "AAB4DE3006808C09D25DD4FF4A3611CFB63C95463CFD99E73D2E1680D229A33B",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "com.fasterxml.jackson.core:jackson-annotations:2.13.5",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.fasterxml.jackson.core:jackson-annotations:2.13.5"
+      }
+    ],
+    "JarSha256": "80AEA8ED7232DB5040CED4B3F982F29DA95BB3D802343DBF6FD82CCD98C21C4F",
+    "LicenseEntries": [
+      "META-INF/LICENSE"
+    ]
+  },
+  {
+    "Coordinate": "com.fasterxml.jackson.core:jackson-core:2.13.5",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.fasterxml.jackson.core:jackson-core:2.13.5"
+      }
+    ],
+    "JarSha256": "48F36A025311D0464AD8DDA4512A20C79E279A9550F63F3179D731D94482474B",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "com.fasterxml.jackson.core:jackson-databind:2.13.5",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.fasterxml.jackson.core:jackson-databind:2.13.5"
+      }
+    ],
+    "JarSha256": "5FEDB24B2356491815D18267F65DA9A21DD67413345AD7795F221AFA25C78984",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.5",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.fasterxml.jackson:jackson-base:2.13.5"
+      }
+    ],
+    "JarSha256": "E58761751FEA8A00DC626AAE1C5F1BE38C5CFD487AEB333D933A4AB5F5A73C55",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.5",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.fasterxml.jackson:jackson-base:2.13.5"
+      }
+    ],
+    "JarSha256": "EF15CEDDDDC58DFBD686B6B7FD0853ED328FF08C628BD4A395734BEC20CA857B",
+    "LicenseEntries": [
+      "META-INF/LICENSE"
+    ]
+  },
+  {
+    "Coordinate": "com.fasterxml.jackson.module:jackson-module-parameter-names:2.13.5",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.fasterxml.jackson:jackson-base:2.13.5"
+      }
+    ],
+    "JarSha256": "E5FCF17369885065DDEC9A9CEBEAD8597C55DE252DEDF10A3C14EEED8AFFACA4",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "com.squareup.okhttp3:okhttp:4.12.0",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.squareup.okhttp3:okhttp:4.12.0"
+      }
+    ],
+    "JarSha256": "B1050081B14BB7A3A7E55A4D3EF01B5DCFABC453B4573A4FC019767191D5F4E0",
+    "LicenseEntries": [
+      "okhttp3/internal/publicsuffix/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "com.squareup.okio:okio-jvm:3.6.0",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.squareup.okio:okio-jvm:3.6.0"
+      }
+    ],
+    "JarSha256": "67543F0736FC422AE927ED0E504B98BC5E269FDA0D3500579337CB713DA28412",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "com.squareup.okio:okio:3.6.0",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.squareup.okio:okio:3.6.0"
+      }
+    ],
+    "JarSha256": "8E63292E5C53BB93C4A6B0C213E79F15990FED250C1340F1C343880E1C9C39B5",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "com.zaxxer:HikariCP:4.0.3",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.zaxxer:HikariCP:4.0.3"
+      }
+    ],
+    "JarSha256": "7C024AEFF1C1063576D74453513F9DE6447D8E624D17F8E27F30A2E97688C6C9",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "jakarta.annotation:jakarta.annotation-api:1.3.5",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "EPL 2.0",
+        "Url": "http://www.eclipse.org/legal/epl-2.0",
+        "DeclaredIn": "jakarta.annotation:jakarta.annotation-api:1.3.5"
+      },
+      {
+        "Name": "GPL2 w/ CPE",
+        "Url": "https://www.gnu.org/software/classpath/license.html",
+        "DeclaredIn": "jakarta.annotation:jakarta.annotation-api:1.3.5"
+      }
+    ],
+    "JarSha256": "85FB03FC054CDF4EFCA8EFD9B6712BBB418E1AB98241C4539C8585BBC23E1B8A",
+    "LicenseEntries": [
+      "META-INF/LICENSE.md",
+      "META-INF/NOTICE.md"
+    ]
+  },
+  {
+    "Coordinate": "jakarta.validation:jakarta.validation-api:2.0.2",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "jakarta.validation:jakarta.validation-api:2.0.2"
+      }
+    ],
+    "JarSha256": "B42D42428F3D922C892A909FA043287D577C0C5B165AD9B7D568CEBF87FC9EA4",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "org.apache.logging.log4j:log4j-api:2.17.2",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.apache:apache:24"
+      }
+    ],
+    "JarSha256": "09351B5A03828F369CDCFF76F4ED39E6A6FC20F24F046935D0B28EF5152F8CE4",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "org.apache.logging.log4j:log4j-to-slf4j:2.17.2",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.apache:apache:24"
+      }
+    ],
+    "JarSha256": "9BCFA5273527B950D79739D11E8F8080CFC881908FA2A946B4E891C0293094DE",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "org.apache.tomcat.embed:tomcat-embed-core:9.0.83",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.apache.tomcat.embed:tomcat-embed-core:9.0.83"
+      }
+    ],
+    "JarSha256": "4ED404D5DEA8652846F3C52C094764C2EC018F28A3561F1D27DF700F7AA5B376",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "org.apache.tomcat.embed:tomcat-embed-el:9.0.83",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.apache.tomcat.embed:tomcat-embed-el:9.0.83"
+      }
+    ],
+    "JarSha256": "A82C4CF8CF9E88D6891CBB4CBCB9F85F788E147C464CBEBA15A2C83276F3344C",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "org.apache.tomcat.embed:tomcat-embed-websocket:9.0.83",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.apache.tomcat.embed:tomcat-embed-websocket:9.0.83"
+      }
+    ],
+    "JarSha256": "B78130B05960761992787EDF2CB4C0AF18D1FE52B35119AD63712AF137D7EB3E",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "org.checkerframework:checker-qual:3.5.0",
+    "Scope": "runtime",
+    "Licenses": [
+      {
+        "Name": "The MIT License",
+        "Url": "http://opensource.org/licenses/MIT",
+        "DeclaredIn": "org.checkerframework:checker-qual:3.5.0"
+      }
+    ],
+    "JarSha256": "729990B3F18A95606FC2573836B6958BCDB44CB52BFBD1B7AA9C339CFF35A5A4",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.hibernate.validator:hibernate-validator:6.2.5.Final",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.hibernate.validator:hibernate-validator-parent:6.2.5.Final"
+      }
+    ],
+    "JarSha256": "8D6D89C3204B30A01DC248352F43DBA196140BF4ADC5F437F63E2AD62A3D2144",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "org.jboss.logging:jboss-logging:3.4.1.Final",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.jboss.logging:jboss-logging:3.4.1.Final"
+      }
+    ],
+    "JarSha256": "8EFE877D93E5E1057A1388B2950503B88B0C28447364FDE08ADBEC61E524EEB8",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.jetbrains:annotations:13.0",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.jetbrains:annotations:13.0"
+      }
+    ],
+    "JarSha256": "ACE2A10DC8E2D5FD34925ECAC03E4988B2C0F851650C94B8CEF49BA1BD111478",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.jetbrains.kotlin:kotlin-stdlib-common:1.9.10"
+      }
+    ],
+    "JarSha256": "CDE3341BA18A2BA262B0B7CF6C55B20C90E8D434E42C9A13E6A3F770DB965A88",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.21",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.21"
+      }
+    ],
+    "JarSha256": "33D148DB0E11DEBD0D90677D28242BCED907F9C77730000FD597867089039D86",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21"
+      }
+    ],
+    "JarSha256": "3DB752A30074F06EE6C57984AA6F27DA44F4D2BBC7F5442651F6988F1CB2B7D7",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "org.jetbrains.kotlin:kotlin-stdlib:1.8.21",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.jetbrains.kotlin:kotlin-stdlib:1.8.21"
+      }
+    ],
+    "JarSha256": "042A1CD1AC976CDCFE5EB63F1D8E0B0B892C9248E15A69C8CFBA495D546EA52A",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "org.postgresql:postgresql:42.3.8",
+    "Scope": "runtime",
+    "Licenses": [
+      {
+        "Name": "BSD-2-Clause",
+        "Url": "https://jdbc.postgresql.org/about/license.html",
+        "DeclaredIn": "org.postgresql:postgresql:42.3.8"
+      }
+    ],
+    "JarSha256": "B0EB10C469BB409447914FA6EC4076212779C7A7E93844BF3136B8884E2B6989",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/licenses/client-2.1.jar/LICENSE",
+      "META-INF/licenses/common-2.1.jar/LICENSE",
+      "META-INF/licenses/saslprep-1.1.jar/LICENSE",
+      "META-INF/licenses/stringprep-1.1.jar/LICENSE"
+    ]
+  },
+  {
+    "Coordinate": "org.slf4j:jul-to-slf4j:1.7.36",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "MIT License",
+        "Url": "http://www.opensource.org/licenses/mit-license.php",
+        "DeclaredIn": "org.slf4j:slf4j-parent:1.7.36"
+      }
+    ],
+    "JarSha256": "9E641FB142C5F0B0623D6222C09EA87523A41BF6BED48AC79940724010B989DE",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "org.slf4j:slf4j-api:1.7.36",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "MIT License",
+        "Url": "http://www.opensource.org/licenses/mit-license.php",
+        "DeclaredIn": "org.slf4j:slf4j-parent:1.7.36"
+      }
+    ],
+    "JarSha256": "D3EF575E3E4979678DC01BF1DCCE51021493B4D11FB7F1BE8AD982877C16A1C0",
+    "LicenseEntries": []
+  },
+  {
+    "Coordinate": "org.springframework:spring-aop:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-aop:5.3.39"
+      }
+    ],
+    "JarSha256": "AA706E4F749982C0BAE5FA637433C44C24F0FFF5D16DC41DEEA6D30C3DFA7C85",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework:spring-beans:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-beans:5.3.39"
+      }
+    ],
+    "JarSha256": "B6697A5D8FACB81AA75E5A46D959D4256DA9CE3B40D33F3B5BBD42A8B1ED5722",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework:spring-context:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-context:5.3.39"
+      }
+    ],
+    "JarSha256": "9E644FC33BECE9A9CB82538167A1B9640AE7B7D80252E893D89B8926A2F81633",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework:spring-core:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-core:5.3.39"
+      }
+    ],
+    "JarSha256": "3A1DDCF05420A9181BD9CACB6062A3EDC493E14D555961AD50E1A6360EB1E75F",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework:spring-expression:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-expression:5.3.39"
+      }
+    ],
+    "JarSha256": "D5337774D889FCDC9C08B0C8B8AAA1018D4C95B9B441DB0118F7AE4D328F2810",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework:spring-jcl:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-jcl:5.3.39"
+      }
+    ],
+    "JarSha256": "ADBE656FC622E2457FEFA09529D4B7C1126A3C4FF1C9306907764FCC93F1B725",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework:spring-jdbc:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-jdbc:5.3.39"
+      }
+    ],
+    "JarSha256": "F314077E4196A4199A1D7B252DB644F39FA6541BB7DC6E92BBB9001D6714D7D9",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework:spring-tx:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-tx:5.3.39"
+      }
+    ],
+    "JarSha256": "DEFDD2E72EB88729E40BC6773C6860D3C52136C46861D27806379562FFC4B21B",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework:spring-web:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-web:5.3.39"
+      }
+    ],
+    "JarSha256": "444F243B936119B5488029F2D9399A3980855C60B493B9E2811464C6433A2B71",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework:spring-webmvc:5.3.39",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework:spring-webmvc:5.3.39"
+      }
+    ],
+    "JarSha256": "1AD8A2BA468C07024BA63CB7681BB30A2ECF8D91124F00FDB4A3D184131B87ED",
+    "LicenseEntries": [
+      "META-INF/license.txt",
+      "META-INF/notice.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework.boot:spring-boot-autoconfigure:2.7.18",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework.boot:spring-boot-autoconfigure:2.7.18"
+      }
+    ],
+    "JarSha256": "1C4E0AADCB662B6149B536A2CF288003FFEFE81A6CC69846E9F14976529A1B08",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt",
+      "META-INF/NOTICE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework.boot:spring-boot-starter-json:2.7.18",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework.boot:spring-boot-starter-json:2.7.18"
+      }
+    ],
+    "JarSha256": "084F592D522DFA36790FE08D4D0B9CEBE6683638889834ED2F885F3C42FECBF6",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt",
+      "META-INF/NOTICE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework.boot:spring-boot-starter-logging:2.7.18",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework.boot:spring-boot-starter-logging:2.7.18"
+      }
+    ],
+    "JarSha256": "202C0894DBFDEFF7BE005597FF98288133A62FE7F5593BE4938400482D19DCB7",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt",
+      "META-INF/NOTICE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework.boot:spring-boot-starter-tomcat:2.7.18",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework.boot:spring-boot-starter-tomcat:2.7.18"
+      }
+    ],
+    "JarSha256": "E4A44478556749137F28001C35D897EFFF31F39161606589CC355DCBF797C6F0",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt",
+      "META-INF/NOTICE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework.boot:spring-boot-starter-validation:2.7.18",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework.boot:spring-boot-starter-validation:2.7.18"
+      }
+    ],
+    "JarSha256": "172A1D733322CB2B48B14455F1C9A75DD8F13DC6DA086439384568FE231F487D",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt",
+      "META-INF/NOTICE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework.boot:spring-boot-starter-web:2.7.18",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework.boot:spring-boot-starter-web:2.7.18"
+      }
+    ],
+    "JarSha256": "A74FAB5F826B600E3C3F4CD7028C5C982B0BF1B849673629CBB758AE790A4C08",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt",
+      "META-INF/NOTICE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework.boot:spring-boot-starter:2.7.18",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework.boot:spring-boot-starter:2.7.18"
+      }
+    ],
+    "JarSha256": "F67A5D913DEFA764295B6A0D8D13573624E437EB34E97D88C0E76BF181656071",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt",
+      "META-INF/NOTICE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.springframework.boot:spring-boot:2.7.18",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0",
+        "DeclaredIn": "org.springframework.boot:spring-boot:2.7.18"
+      }
+    ],
+    "JarSha256": "530F4E0FDFEB3A0E2B3A369D15CDEA38FBDC1696F8B030C35A6AD65C27524950",
+    "LicenseEntries": [
+      "META-INF/LICENSE.txt",
+      "META-INF/NOTICE.txt"
+    ]
+  },
+  {
+    "Coordinate": "org.yaml:snakeyaml:1.30",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.yaml:snakeyaml:1.30"
+      }
+    ],
+    "JarSha256": "F43A4E40A946B8CDFD0321BC1C9A839BC3F119C57E4CA84FB87C367F51C8B2B3",
+    "LicenseEntries": []
+  }
+]

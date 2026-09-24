@@ -1,0 +1,9 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiModelRuntimeAutoConfiguration,\
+io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiApplicationConfigAutoConfiguration,\
+io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiPlainChatAutoConfiguration,\
+io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiGroupAgentCatalogAutoConfiguration,\
+io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiConversationManagementAutoConfiguration,\
+io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiConversationShareAutoConfiguration,\
+io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiGroupExecutionAutoConfiguration,\
+io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiSingleExecutionAutoConfiguration

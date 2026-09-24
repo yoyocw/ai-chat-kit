@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+io.github.yoyocw.aichatkit.module.ai.adapter.platform.host.PlatformInspectionAutoConfiguration,\
+io.github.yoyocw.aichatkit.module.ai.adapter.platform.host.PlatformHostRuntimeValidationConfiguration,\
+io.github.yoyocw.aichatkit.module.ai.adapter.platform.host.PlatformHostConfiguration,\
+io.github.yoyocw.aichatkit.module.ai.adapter.platform.host.PlatformInProcessConfiguration

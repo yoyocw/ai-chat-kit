@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         child.project.url.inherit.append.path="false"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.github.yoyocw</groupId>
+        <artifactId>ai-chat-kit</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>ai-chat-kit-components</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>ai-chat-kit-contract</module>
+        <module>ai-chat-kit-engine</module>
+        <module>ai-chat-kit-starter</module>
+        <module>ai-chat-kit-adapter-web</module>
+        <module>ai-chat-kit-adapter-jdbc</module>
+        <module>ai-chat-kit-adapter-mcp-jwt-v1</module>
+        <module>ai-chat-kit-adapter-hosted-proxy</module>
+    </modules>
+
+    <profiles>
+        <profile>
+            <id>platform-compat</id>
+            <modules>
+                <module>ai-chat-kit-legacy-api</module>
+                <module>ai-chat-kit-host-platform</module>
+                <module>ai-chat-kit-legacy-server</module>
+            </modules>
+        </profile>
+        <!-- 若依制品需由锁定官方源码构建；普通林业构建不依赖外部宿主制品。 -->
+        <profile>
+            <id>ai-ruoyi-host</id>
+            <modules>
+                <module>ai-chat-kit-host-ruoyi</module>
+            </modules>
+        </profile>
+    </profiles>
+
+    <name>AI Chat Kit Components</name>
+    <description>中立 AI 契约、引擎、显式启用 Starter 与可选适配器</description>
+    <url>https://github.com/yoyocw/ai-chat-kit</url>
+    <scm child.scm.connection.inherit.append.path="false"
+         child.scm.developerConnection.inherit.append.path="false"
+         child.scm.url.inherit.append.path="false">
+        <connection>scm:git:https://github.com/yoyocw/ai-chat-kit.git</connection>
+        <developerConnection>scm:git:https://github.com/yoyocw/ai-chat-kit.git</developerConnection>
+        <url>https://github.com/yoyocw/ai-chat-kit</url>
+        <tag>HEAD</tag>
+    </scm>
+</project>

@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+io.github.yoyocw.aichatkit.ai.adapter.mcp.v1.autoconfigure.AiMcpV1SigningAutoConfiguration,\
+io.github.yoyocw.aichatkit.ai.adapter.mcp.v1.autoconfigure.AiMcpV1VerificationAutoConfiguration

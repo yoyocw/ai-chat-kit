@@ -1,0 +1,3 @@
+io.github.yoyocw.aichatkit.compat.framework.mq.redis.config.AiChatKitRedisMQProducerAutoConfiguration
+io.github.yoyocw.aichatkit.compat.framework.mq.redis.config.AiChatKitRedisMQConsumerAutoConfiguration
+io.github.yoyocw.aichatkit.compat.framework.mq.rabbitmq.config.AiChatKitRabbitMQAutoConfiguration

@@ -1,0 +1,15 @@
+server:
+  address: 127.0.0.1
+  port: 0
+spring:
+  application:
+    name: ai-client-host-example
+ai-chat-kit:
+  ai:
+    client:
+      enabled: ${AI_CLIENT_ENABLED:false}
+      # 历史环境变量名保留；实际值须为承接四条旧代理路径的网关或 AI 服务 HTTPS 源站。
+      # 路径由客户端追加 /admin-api/system/ai-proxy/{single|group}/{send|stop}。
+      # 不填写纯 system 直连地址，不包含业务路径、查询参数或用户信息。
+      base-url: ${AI_CLIENT_SYSTEM_ORIGIN:}
+      stream-timeout-seconds: 600

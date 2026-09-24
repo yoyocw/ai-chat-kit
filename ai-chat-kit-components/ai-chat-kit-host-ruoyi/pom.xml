@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-components</artifactId><version>${revision}</version></parent>
+    <artifactId>ai-chat-kit-host-ruoyi</artifactId>
+    <description>官方 RuoYi-Vue 原生普通登录适配，固定单租户，宿主需对齐 Boot 2.7.18</description>
+    <properties><ruoyi.host.version>3.9.2</ruoyi.host.version></properties>
+    <dependencies>
+        <dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-contract</artifactId><version>${revision}</version></dependency>
+        <!-- 官方 springboot2 提交 6230a34b5f9b60b670a9f438dc43b41b8a856598 构建制品，由宿主提供，禁止替换成旧版或向其他宿主传播。 -->
+        <dependency><groupId>com.ruoyi</groupId><artifactId>ruoyi-common</artifactId><version>${ruoyi.host.version}</version><scope>provided</scope></dependency>
+        <dependency><groupId>com.ruoyi</groupId><artifactId>ruoyi-framework</artifactId><version>${ruoyi.host.version}</version><scope>provided</scope></dependency>
+        <dependency><groupId>com.ruoyi</groupId><artifactId>ruoyi-system</artifactId><version>${ruoyi.host.version}</version><scope>provided</scope></dependency>
+        <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-autoconfigure</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-web</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-tx</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>org.springframework.security</groupId><artifactId>spring-security-web</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><scope>provided</scope></dependency>
+    </dependencies>
+</project>

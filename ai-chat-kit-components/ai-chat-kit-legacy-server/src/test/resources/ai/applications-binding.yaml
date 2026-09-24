@@ -1,0 +1,12 @@
+# 仅用于绑定测试，不参与应用启动；所有值来自测试构造的属性源。
+ai-chat-kit:
+  ai:
+    applications:
+      single:
+        app-id: ${AI_SINGLE_APP_ID:}
+        mcp-id: ${AI_SINGLE_MCP_ID:}
+        user-auth-tool-ids: ${AI_SINGLE_USER_AUTH_TOOL_IDS:}
+      group:
+        app-id: ${AI_GROUP_APP_ID:}
+        mcp-id: ${AI_GROUP_MCP_ID:}
+        user-auth-tool-ids: ${AI_GROUP_USER_AUTH_TOOL_IDS:}

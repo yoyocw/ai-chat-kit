@@ -1,0 +1,3 @@
+io.github.yoyocw.aichatkit.ai.adapter.jdbc.autoconfigure.AiJdbcStorageAutoConfiguration
+io.github.yoyocw.aichatkit.ai.adapter.jdbc.autoconfigure.AiJdbcExecutionScopeAutoConfiguration
+io.github.yoyocw.aichatkit.ai.adapter.jdbc.autoconfigure.AiJdbcStopOriginAutoConfiguration

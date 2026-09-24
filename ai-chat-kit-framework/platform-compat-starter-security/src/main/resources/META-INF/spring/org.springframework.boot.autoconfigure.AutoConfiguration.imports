@@ -1,0 +1,5 @@
+io.github.yoyocw.aichatkit.compat.framework.security.config.AiChatKitSecurityRpcAutoConfiguration
+io.github.yoyocw.aichatkit.compat.framework.security.config.AiChatKitSecurityAutoConfiguration
+io.github.yoyocw.aichatkit.compat.framework.security.config.AiChatKitWebSecurityConfigurerAdapter
+io.github.yoyocw.aichatkit.compat.framework.operatelog.config.AiChatKitOperateLogConfiguration
+io.github.yoyocw.aichatkit.compat.framework.operatelog.config.AiChatKitOperateLogRpcAutoConfiguration

@@ -1,0 +1,143 @@
+spring:
+  application:
+    name: ai-server
+  mvc:
+    # SSE 必须长于百炼 180 秒读取超时，避免 Spring MVC 默认 30 秒提前终止普通对话和群聊。
+    async:
+      request-timeout: 210s
+  profiles:
+    active: local
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+  config:
+    import:
+      - optional:classpath:application-${spring.profiles.active}.yaml
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml
+  servlet:
+    multipart:
+      max-file-size: 16MB
+      max-request-size: 32MB
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+      write-date-timestamps-as-nanoseconds: false
+      write-durations-as-timestamps: true
+      fail-on-empty-beans: false
+  cache:
+    type: REDIS
+    redis:
+      time-to-live: 1h
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+server:
+  port: 48087
+
+logging:
+  level:
+    # AI 自有签发私钥不得进入 MyBatis 参数及结果日志。
+    io.github.yoyocw.aichatkit.module.ai.dal.mysql.serviceapikey.AiManagedSigningKeyMapper: 'OFF'
+  file:
+    name: ${user.home}/logs/${spring.application.name}.log
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui
+  default-flat-param-object: true
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      id-type: NONE
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+    banner: false
+  type-aliases-package: ${aichatkit.info.base-package}.dal.dataobject
+  encryptor:
+    password: ${MYBATIS_ENCRYPTOR_PASSWORD}
+
+mybatis-plus-join:
+  banner: false
+
+easy-trans:
+  is-enable-global: false
+
+ai-chat-kit:
+  ai:
+    # 既有 AI 宿主显式启用引擎，独立 engine 依赖默认不启用。
+    engine:
+      enabled: true
+
+aichatkit:
+  info:
+    version: 1.0.0
+    base-package: io.github.yoyocw.aichatkit.module.ai
+  web:
+    admin-ui:
+      url: ${HOST_ADMIN_UI_URL:}
+  xss:
+    enable: false
+    exclude-urls:
+      - ${management.endpoints.web.base-path}/**
+  swagger:
+    title: AI 智能对话服务
+    description: 提供单聊与多智能体群聊接口
+    version: ${aichatkit.info.version}
+  tenant:
+    enable: true
+    ignore-urls:
+    ignore-tables:
+debug: false
+
+---
+# 可选会话核验迁移模板：补齐部署授权和秘密后显式覆盖开启；默认不授予查询能力。
+ai-chat-kit:
+  ai:
+    # 迁移后由 AI 调用通用会话核验；旧 system AI 代理配置不再生效。
+    session-inspection:
+      enabled: false
+      # base-url: ${AI_INSPECTION_BASE_URL} # 固定 HTTPS 源站，不含路径
+      # consumer-access-token: ${AI_INSPECTION_CONSUMER_ACCESS_TOKEN} # 原始令牌，无 Bearer；仅秘密配置
+      # consumer-tenant-id: ${AI_INSPECTION_CONSUMER_TENANT_ID}
+      # subject-tenant-id: ${AI_INSPECTION_SUBJECT_TENANT_ID}
+      # callers 每项须配置真实 client-record-id、client-id 和经批准的 binding；禁止通配放行。
+      callers: []
+    # 原 issuer/audience/公钥沿用 aichatkit.security.mcp-jwt 配置，迁移不自动轮换。
+    local-delegation-signing:
+      enabled: false
+      source: CONFIGURATION # DATABASE 只读 AI 自有密钥表，失败不回退其他来源
+      # private-key: ${AI_DELEGATION_PRIVATE_KEY} # 原 PKCS#8 私钥，仅秘密配置供给
+    key-management:
+      enabled: false # 仅首次初始化；需真实平台管理员核验，不能与签发同时开启
+    business-proxy:
+      enabled: false
+      # authorization-base-url: ${AI_PROXY_AUTHORIZATION_BASE_URL} # 固定认证 HTTPS 源站
+      # ai-base-url: ${AI_PROXY_AI_BASE_URL} # 固定 AI HTTPS 源站
+      # client-id: ${AI_PROXY_CLIENT_ID}
+      # client-record-id: ${AI_PROXY_CLIENT_RECORD_ID} # 绑定原客户端实体，不复用核验消费者
+      # client-secret: ${AI_PROXY_CLIENT_SECRET} # 仅秘密配置
+      max-token-lifetime-seconds: 300 # 30..900；认证侧客户端令牌寿命不得超过此值
+aichatkit:
+  security:
+    # 资源侧用户 JWT 必须实时核验会话；仅旧 JWT 公钥配置不足以兼容迁移。
+    # 关闭时拒绝用户 JWT；不回退已删除的裸会话 ID RPC，固定服务密钥认证另行处理。
+    mcp-session-inspection:
+      enabled: false
+      # base-url: ${MCP_INSPECTION_BASE_URL} # 固定认证 HTTPS 源站，不含路径
+      # consumer-tenant-id: ${MCP_INSPECTION_CONSUMER_TENANT_ID}
+      # consumer-access-token: ${MCP_INSPECTION_CONSUMER_ACCESS_TOKEN} # 原始令牌；仅秘密配置
+      # 也可由宿主提供 mcpSessionInspectionCredentialProvider，令牌申请/更新不由核验自动执行。
