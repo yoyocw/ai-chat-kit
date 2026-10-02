@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-02",
+  "group_id": "io.github.yoyocw",
+  "version": "2.0.0-SNAPSHOT",
+  "implementation_base_commit": "59c3bff931efe69ba71a41c0ab379304ec1925d2",
+  "evidence_scope": "Local frozen candidate JARs; controlled authentication and model; local PostgreSQL; no live host integration or release.",
+  "candidate_own_jars_before_build": 0,
+  "tests": {
+    "components": {
+      "tests": 153,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "web_consumer": {
+      "tests": 20,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "headless_consumer": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "total_tests": 178,
+  "source_entries_verified": 308,
+  "duplicate_component_classes": 0,
+  "web_consumer_candidate_components": 8,
+  "headless_consumer_candidate_components": 4,
+  "minimal_starter_dependency_comparison": {
+    "before_all_jars": 27,
+    "after_all_jars": 17,
+    "before_third_party_jars": 24,
+    "after_third_party_jars": 14,
+    "before_bytes": 15844708,
+    "after_bytes": 10012706,
+    "removed_third_party_names": [
+      "annotations-13.0.jar",
+      "kotlin-stdlib-1.8.21.jar",
+      "kotlin-stdlib-common-1.9.10.jar",
+      "kotlin-stdlib-jdk7-1.8.21.jar",
+      "kotlin-stdlib-jdk8-1.8.21.jar",
+      "okhttp-4.12.0.jar",
+      "okio-3.6.0.jar",
+      "okio-jvm-3.6.0.jar",
+      "spring-web-5.3.39.jar",
+      "spring-webmvc-5.3.39.jar"
+    ]
+  },
+  "full_family_third_party_count": 56,
+  "full_family_coordinates_scopes_binary_hashes_unchanged": true,
+  "artifacts": [
+    {
+      "artifact_id": "ai-chat-kit-mcp-jwt",
+      "source_entries_verified": 4,
+      "jar_sha256": "00f93ebb95cfc8d8525c82b649064c450142a5467d52c5945424b4c478bae491",
+      "sources_sha256": "312bb38d78be66ff38eaae55c1b7d5126b075ff35374d19fd3ec9ac758502166",
+      "pom_sha256": "a61627883e1715005c4fed99ea1c6b4e26ec017336c2c0ab252d285bb59a1173"
+    },
+    {
+      "artifact_id": "ai-chat-kit-contract",
+      "source_entries_verified": 73,
+      "jar_sha256": "354d4106ffb5cf7332014166fe74f53a105a732db00fe6b3edd5bdff75bea789",
+      "sources_sha256": "1c8e0bc815dd29aba3e9d67ae8eccfbae5e4d4407255fa2499894d0ea642ba39",
+      "pom_sha256": "9296b32d03f1e4c61130aa10471af627976938f80f67d1e7767fce5c4650f14e"
+    },
+    {
+      "artifact_id": "ai-chat-kit-engine",
+      "source_entries_verified": 47,
+      "jar_sha256": "b383212ecece73548d64827394f9386fbd252adc755938b43c387d6b970d84c0",
+      "sources_sha256": "9776829d8df75a0e39e51112ecf9bab875cb52e9ace0fa8c9f78aa20f0f3a181",
+      "pom_sha256": "096561077c2d6662cb50a217aad08bc77c154c7f3dd589929a3c408f9aadb119"
+    },
+    {
+      "artifact_id": "ai-chat-kit-model-bailian",
+      "source_entries_verified": 22,
+      "jar_sha256": "504ccb73011f1f51009d14b599d3b51b18de2b983dc5d9c3a33d124cd846b003",
+      "sources_sha256": "cd8207905606396ae755b056c8687372b2f2ace56e55d00d1deaf4ee6f068e7e",
+      "pom_sha256": "34b4be9187dc871b4cbe5f47c47ca4c059e4ec8f7ac292bbf84e86d49ecea473"
+    },
+    {
+      "artifact_id": "ai-chat-kit-starter",
+      "source_entries_verified": 17,
+      "jar_sha256": "b31b13dd6ec012f369f410e48dbbc87c4e2eb0b87c8e92ff4953e9108b1d40b0",
+      "sources_sha256": "11dd9129fcc511771c4f8ad1e7559ad2924a06437d0ae441e3acef6349b28115",
+      "pom_sha256": "094598ab8a9d680e8307a705fc113e159f0a707ab58a1e94a33cf8b92a5a948a"
+    },
+    {
+      "artifact_id": "ai-chat-kit-adapter-web",
+      "source_entries_verified": 34,
+      "jar_sha256": "11fd9dbfad23fec19653b970fb1396fea0da07bbc0f7a65c0cc8ac3c38254470",
+      "sources_sha256": "63b4075a907a06ffbf2a8f55b7f29203460103137ae7dba97eb8c109f1c7d536",
+      "pom_sha256": "9b172c305b562a67ffd01dc678138e39738b1c1f9d979e006631deefcd4b31ab"
+    },
+    {
+      "artifact_id": "ai-chat-kit-adapter-mybatis-plus",
+      "source_entries_verified": 39,
+      "jar_sha256": "0ace6056e627bf6f7adf734f3fcd6004f270a9efc6b4c5364c534449b9b0c216",
+      "sources_sha256": "d77b51d0da52537a4b07050e1d462033402710858126913507d0c8d7ca8bd490",
+      "pom_sha256": "c74c92eccb65420dd8eac84e2ff65c59b2e6917b1d603aface18c692f264744a"
+    },
+    {
+      "artifact_id": "ai-chat-kit-adapter-mcp-jwt-v1",
+      "source_entries_verified": 22,
+      "jar_sha256": "ad921769d9800add67260bc8b44ad9c94c3e0643c29042e0be98aacd40079536",
+      "sources_sha256": "773449adc37bac9f96dc34107868eb692561bb860e92a8409cc731e2035d7255",
+      "pom_sha256": "d62f2ceab196c52120132d6b6a465df792a50f628f28ebbf8a221037a6b17b93"
+    },
+    {
+      "artifact_id": "ai-chat-kit-adapter-hosted-proxy",
+      "source_entries_verified": 21,
+      "jar_sha256": "365e547ecade96942ba4547db94e75579c85128502d3e8c15ab881f5ba3e4f80",
+      "sources_sha256": "28aa490646c01bada1e2be4fef5c23ae6633c91b730fc21383f9cb6379db6a54",
+      "pom_sha256": "043c98484fd14071c4f2f1f9e5e11031230119298961ea7d79fd97f584eda535"
+    },
+    {
+      "artifact_id": "ai-chat-kit-host-platform",
+      "source_entries_verified": 29,
+      "jar_sha256": "16300800ad8b1efa80a913e21e4122223367d87f8cea21b607e41e51bbc1d0d5",
+      "sources_sha256": "c55fdfe4cb9e50ffb0e74d8cc9bec03ed5dd5cb2af729b0714e0da08c6c64255",
+      "pom_sha256": "4155f1b5e730fa46ae73db7098429d4e7d8c145420370d8ba4be49b3b6e30612"
+    }
+  ]
+}

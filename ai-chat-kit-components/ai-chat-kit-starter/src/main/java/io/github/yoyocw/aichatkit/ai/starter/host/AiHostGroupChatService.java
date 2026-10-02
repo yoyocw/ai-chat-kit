@@ -1,15 +1,13 @@
 package io.github.yoyocw.aichatkit.ai.starter.host;
 
 import io.github.yoyocw.aichatkit.module.ai.contract.execution.AiPreparedExecution;
-import io.github.yoyocw.aichatkit.ai.engine.execution.AiSseEventEncoder;
 
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityError;
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityException;
 
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiHostSession;
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiInvocationContext;
-import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatExecutionService;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +26,7 @@ public final class AiHostGroupChatService {
     /** 真实用户认证及固定群聊权限边界。 */
     private final AiHostAuthenticationBridge authenticationBridge;
     /** 由容器管理并绑定真实事务的群聊同步入口，不能使用仅流式执行的组件替代。 */
-    private final AiGroupChatExecutionService executionService;
+    private final AiGroupChatExecutor executionService;
 
     /**
      * @param authenticationBridge 真实宿主认证桥接
@@ -36,7 +34,7 @@ public final class AiHostGroupChatService {
      * @throws NullPointerException 任一必要服务缺失
      */
     public AiHostGroupChatService(AiHostAuthenticationBridge authenticationBridge,
-                                 AiGroupChatExecutionService executionService) {
+                                 AiGroupChatExecutor executionService) {
         this.authenticationBridge = Objects.requireNonNull(authenticationBridge, "宿主认证桥接不能为空");
         this.executionService = Objects.requireNonNull(executionService, "群聊引擎不能为空");
     }
@@ -65,20 +63,19 @@ public final class AiHostGroupChatService {
      * @param conversationId 正数群聊会话编号
      * @param content 本轮问题，由引擎校验内容与长度
      * @param expectedActorId 仅用于与真实登录身份匹配的预期用户标识
-     * @return 事务提交后交给 MVC 执行的流式响应
+     * @return 事务提交后可消费的中立执行
      * @throws IllegalArgumentException 会话编号或内容无效
      * @throws IllegalStateException 宿主认证失败或授权与执行身份不一致
      */
-    public StreamingResponseBody send(Long conversationId, String content, String expectedActorId) {
-        AiPreparedExecution prepared = prepare(conversationId, content, expectedActorId);
-        return output -> prepared.consume(new AiSseEventEncoder(output));
+    public AiPreparedExecution send(Long conversationId, String content, String expectedActorId) {
+        return prepare(conversationId, content, expectedActorId);
     }
 
     /** Authorize and prepare synchronously; consume only after the actual transaction commit. */
     public AiPreparedExecution prepare(Long conversationId, String content, String expectedActorId) {
         requireId(conversationId);
         AiHostSession session = authenticationBridge.authorizeCurrent(expectedActorId, AiHostAction.GROUP_CHAT_SEND);
-        return executionService.prepareMessageForContext(conversationId, content, expectedContext(session));
+        return executionService.sendMessageForContext(conversationId, content, expectedContext(session));
     }
 
     /**

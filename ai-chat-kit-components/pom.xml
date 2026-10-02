@@ -15,6 +15,7 @@
     <modules>
         <module>ai-chat-kit-contract</module>
         <module>ai-chat-kit-engine</module>
+        <module>ai-chat-kit-model-bailian</module>
         <module>ai-chat-kit-starter</module>
         <module>ai-chat-kit-adapter-web</module>
         <module>ai-chat-kit-adapter-mybatis-plus</module>

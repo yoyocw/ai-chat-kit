@@ -11,7 +11,7 @@ import io.github.yoyocw.aichatkit.module.ai.service.chat.AiConversationShareServ
 import io.github.yoyocw.aichatkit.module.ai.contract.share.AiConversationSharePort;
 import io.github.yoyocw.aichatkit.module.ai.service.chat.AiConversationManagementService;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiConversationStorePort;
-import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatExecutionService;
+import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatExecutor;
 import io.github.yoyocw.aichatkit.module.ai.contract.authorization.AiInvocationAuthorizationPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.context.AiGroupAgentCatalogPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiGroupChatPreparePort;
@@ -31,9 +31,8 @@ import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatComplet
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatPreparePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatStatePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.model.AiModelClient;
-import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatExecutionService;
-import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatStreamEventWriter;
-import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatStreamService;
+import io.github.yoyocw.aichatkit.module.ai.service.chat.AiSingleChatExecutor;
+import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatStreamExecutor;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -86,7 +85,7 @@ public final class AiStarterDependencyVerifier implements SmartInitializingSingl
         require(missing, AiSingleChatStatePort.class, AiInvocationContextPort.class, AiHostExecutionScopePort.class,
                 AiSingleChatCompletionPort.class, AiSingleChatPreparePort.class, AiSingleChatBusinessPort.class,
                 AiSingleResponseDataPort.class, AiExecutionAuditPort.class, AiMessageOriginPort.class, AiInvocationAuthorizationPort.class,
-                AiTransactionExecutor.class, AiChatStreamEventWriter.class, AiChatExecutionService.class,
+                AiTransactionExecutor.class, AiSingleChatExecutor.class,
                 AiHostSingleChatService.class);
     }
 
@@ -96,10 +95,10 @@ public final class AiStarterDependencyVerifier implements SmartInitializingSingl
                 io.github.yoyocw.aichatkit.ai.starter.host.AiHostGroupAgentService.class);
         require(missing, AiHostExecutionScopePort.class, AiGroupChatStreamStatePort.class,
                 AiGroupResponseDataPort.class, AiExecutionAuditPort.class,
-                AiGroupChatStreamService.class,
+                AiGroupChatStreamExecutor.class,
                 AiGroupAgentCatalogPort.class, AiGroupChatPreparePort.class, AiInvocationAuthorizationPort.class,
                 AiMessageOriginPort.class, AiTransactionExecutor.class,
-                AiGroupChatExecutionService.class, AiHostGroupChatService.class);
+                AiGroupChatExecutor.class, AiHostGroupChatService.class);
     }
 
     /** 允许宿主通过 Primary 消歧；失败信息只包含固定类型名，不包含 Bean 值或敏感配置。 */

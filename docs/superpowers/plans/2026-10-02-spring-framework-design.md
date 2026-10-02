@@ -1,15 +1,15 @@
 # Spring 思想重构实施计划
 
 日期：2026-10-02
-状态：**第一阶段任务 1–5 已完成；后续物理拆分未实施。** 具体证据与兼容范围见[实施结果](../../componentization/spring-refactor.md)。
+状态：**整体实施计划已完成，包括第一阶段任务 1–5 与后续物理依赖拆分。** 当前版本为 `2.0.0-SNAPSHOT`。第一阶段历史证据见[兼容重构实施结果](../../componentization/spring-refactor.md)；当前制品、迁移与验证见[物理拆分实施结果](../../componentization/spring-physical-split.md)。
 设计依据：[整体设计](../specs/2026-10-02-spring-framework-design.md)
 起始代码：`717a6d7b9a65f153a68253d6524b7b9ddadfc827`
 
-> 本轮采用 subagent-driven-development 工作流。复选项对应本轮限定范围内的验收；真实业务环境不在本轮范围。原设计基线保留，实施起点为 `f3ac6e1fb85ae1131ef46e04b1197dc846115c1b`。
+> 第一阶段采用 subagent-driven-development 工作流，其实施起点为 `f3ac6e1fb85ae1131ef46e04b1197dc846115c1b`。下列任务 1–5 保留该阶段历史范围；物理拆分基线为 `59c3bff931efe69ba71a41c0ab379304ec1925d2`，具体工作见[物理拆分计划](2026-10-02-spring-physical-split.md)。两阶段受控验收均已完成，真实业务环境不在本次完成声明中。
 
-**目标：** 保持内置宿主接入方式、现有发送方法与安全语义，让模型与传输细节退出新执行内核，由 Spring 装配默认实现和替换扩展。旧自定义业务授权与直接构造执行器的用法单独提供迁移说明。
+**目标：** 保持配置键、HTTP/SSE 协议与安全语义，让模型与传输细节退出执行内核，由 Spring 装配默认实现和替换扩展。第一阶段保留旧 MVC 发送方法；已完成的第二阶段按 2.0 显式迁移 Java API 和 Maven 依赖。Starter 的 `send` / `prepare` 返回 `AiPreparedExecution`，旧底层 MVC 门面由既有 Web 制品提供。
 
-**架构：** 中立 Port + 构造器注入 + 条件自动配置 + 小型组合式执行协作类。第一阶段保持现有 Maven 模块数量与坐标。
+**架构：** 中立 Port + 构造器注入 + 条件自动配置 + 小型组合式执行协作类。第一阶段保持当时的 Maven 模块数量与坐标；当前唯一新增模块为可选 `ai-chat-kit-model-bailian`，`adapter-web` 承接传输实现，`engine` / `starter` 不再包含或传递 MVC、Servlet、OkHttp 或百炼实现。
 
 **技术栈：** Java 8、Spring Boot 2.7.18、Spring 5.3、MyBatis-Plus、PostgreSQL、JUnit 5。
 
@@ -21,7 +21,7 @@
 - 自定义旧业务授权须迁移独立授权 Port；保留方法签名不等于所有扩展装配和旧构造器零改动。
 - 真实同源短事务、行锁、完成/停止 CAS、提交后取消继续有效。
 - 不使用全局 Bean 查询驱动业务，不新增通用事件总线或插件注册中心。
-- 不关闭宿主资源；第一阶段不声称移除 engine 的 MVC / OkHttp 物理依赖。
+- 不关闭宿主资源；第一阶段未移除 engine 的 MVC / OkHttp 物理依赖，第二阶段已由实际缺类的独立无 Web 消费者证明物理移除。
 - 不连接真实业务环境；验证仅限本地受控资源和已授权测试。
 - 每阶段保留差异、有效测试结果及遗留边界。任务 1–5 共用契约且须组合编译，本轮以一个可编译提交交付，最后核对远程分支一致性。
 
@@ -33,6 +33,10 @@
 - 授权/编排工作项拥有执行器和业务 Port，必须等待模型契约定稿。
 - Web 工作项拥有 SSE 编码与 Web 测试，等待中立事件接口定稿。
 - 合并负责人管理 POM、README、发布脚本、独立消费者和集成验证。各工作项不得覆盖其他人的修改。
+
+## 第一阶段历史记录（任务 1–5 已完成）
+
+下列步骤及验收保持第一阶段当时的兼容范围；源码路径已更新到拆分后的现存位置，当前状态以第二阶段验收和[物理拆分实施结果](../../componentization/spring-physical-split.md)为准。
 
 ## 任务 1：明确特征行为与可替换点
 
@@ -52,9 +56,9 @@
 
 涉及：
 - `C/ai-chat-kit-contract/J/module/ai/contract/model/`：新增 AiModelClient、AiModelRequest、AiModelEvent、AiModelResult、AiModelException（原计划候选名 AiModelFailure）。
-- `C/ai-chat-kit-engine/J/module/ai/framework/bailian/`：新增 BailianModelClient 适配器，保留底层客户端。
+- `C/ai-chat-kit-model-bailian/J/module/ai/framework/bailian/`：BailianModelClient 与底层客户端的当前位置；第一阶段曾在 engine 内新增适配器。
 - `C/ai-chat-kit-engine/J/ai/engine/autoconfigure/AiModelRuntimeAutoConfiguration.java`
-- `C/ai-chat-kit-engine/J/module/ai/config/BailianProperties.java`
+- `C/ai-chat-kit-model-bailian/J/module/ai/config/BailianProperties.java`（第一阶段曾在 engine 内）
 - 单聊、群聊和会话管理中直接使用 BailianClient 的位置，以及对应自动配置的模型条件和构造注入。
 - `C/ai-chat-kit-starter/J/ai/starter/autoconfigure/AiStarterDependencyVerifier.java`：模型完整性校验。
 
@@ -65,14 +69,14 @@
 - [x] 对客户端关闭、新调用登记与取消增加同一生命周期协调，关闭幂等。
 - [x] 用受控模型验证取消、超时、会话失效以及默认 Bean 替换；证明没有第二套池。
 
-验收：执行内核可使用假模型运行，不依赖 Bailian 具体类；原生产模型配置仍兼容。底层包与 OkHttp 第一阶段仍在 engine 制品内。
+第一阶段验收：执行内核可使用假模型运行，不依赖 Bailian 具体类；原模型配置保持兼容。当时底层包与 OkHttp 仍在 engine 制品内，现已迁至可选模型制品。
 
 ## 任务 3：授权职责与装配收敛
 
 涉及：
 - `C/ai-chat-kit-contract/J/module/ai/contract/context/AiSingleChatBusinessPort.java`
-- `C/ai-chat-kit-engine/J/module/ai/service/chat/AiChatExecutionService.java`
-- `C/ai-chat-kit-engine/J/module/ai/service/groupchat/AiGroupChatExecutionService.java`
+- `C/ai-chat-kit-engine/J/module/ai/service/chat/AiSingleChatExecutor.java`
+- `C/ai-chat-kit-engine/J/module/ai/service/groupchat/AiGroupChatExecutor.java`
 - `C/ai-chat-kit-engine/J/ai/engine/autoconfigure/AiSingleExecutionAutoConfiguration.java`
 - 同目录 GroupExecution / ConversationManagement / ConversationShare 配置。
 - `C/ai-chat-kit-starter/J/ai/starter/autoconfigure/AiStarterDependencyVerifier.java`
@@ -90,21 +94,22 @@
 
 涉及：
 - `C/ai-chat-kit-contract/J/module/ai/contract/execution/`：新增中立事件接收与执行句柄（最终命名随任务 1 清单确定）。
-- `C/ai-chat-kit-engine/J/module/ai/service/chat/AiChatExecutionService.java`
-- 同目录 `AiChatStreamEventWriter.java`
-- `C/ai-chat-kit-engine/J/module/ai/service/groupchat/AiGroupChatExecutionService.java` 与 `AiGroupChatStreamService.java`
+- `C/ai-chat-kit-engine/J/module/ai/service/chat/AiSingleChatExecutor.java`
+- `C/ai-chat-kit-adapter-web/J/module/ai/service/chat/AiChatExecutionService.java` 与 `AiChatStreamEventWriter.java`（第一阶段曾在 engine 内）
+- `C/ai-chat-kit-engine/J/module/ai/service/groupchat/AiGroupChatExecutor.java` 与 `AiGroupChatStreamExecutor.java`
+- `C/ai-chat-kit-adapter-web/J/module/ai/service/groupchat/AiGroupChatExecutionService.java` 与 `AiGroupChatStreamService.java`（第一阶段曾在 engine 内）
 - `C/ai-chat-kit-starter/J/ai/starter/host/AiHostSingleChatService.java`、`AiHostGroupChatService.java`
 - `C/ai-chat-kit-adapter-web/src/test/java/.../AiWebActivationBoundaryTest.java`
 
 - [x] 新增中立入口，将同步准备与异步流消费分离；句柄在真实事务提交后就绪，回滚后失效，提交前消费拒绝。
 - [x] 覆盖 REQUIRED 加入宿主外层事务后的提交、回滚和未提交消费，不通过 REQUIRES_NEW 提前提交。
-- [x] 旧 StreamingResponseBody 方法委托新入口，保留已有签名、字段和错误语义。
-- [x] 共用 SSE 编码器；过渡期可留在 engine 的兼容包，不能引入 engine → adapter-web 反向依赖。
+- [x] 第一阶段旧 StreamingResponseBody 方法委托新入口并保留当时的签名、字段与错误语义；2.0 门面返回类型按下节迁移。
+- [x] 第一阶段共用 SSE 编码器并暂留 engine 兼容包；第二阶段已移入 adapter-web，全程没有 engine → adapter-web 反向依赖。
 - [x] 仅提取已验证重复的状态探针、重试判定与完成协调；单群聊差异保持显式。
 - [x] 保留开始审计与准备同事务；终态及回复提交后尽力记录完成审计，覆盖完成审计失败不改终态。
 - [x] 在受控身份和自定义作用域适配器下，验证流线程原上下文恢复、事务资源释放、输出断连、取消交错、错误终态和两模式的恢复次数/输出差异；实际原生宿主上下文及非空群聊旧 session 的独立清理验收不由本轮替身测试证明。
 
-验收：新内核没有 MVC/SSE 类型依赖；内置宿主及已有发送方法的消费者保持兼容；旧自定义授权和直接构造执行器的迁移符合任务 3 的明确范围。当前整个 engine JAR 仍含兼容 MVC 类型。
+第一阶段验收：新内核没有 MVC/SSE 类型依赖，内置宿主及已有发送方法的消费者保持当时的兼容范围；旧自定义授权与直接构造执行器迁移见任务 3。当时整个 engine JAR 仍含兼容 MVC 类型；当前这些类型由 adapter-web JAR 提供。
 
 ## 任务 5：集成回归与交付
 
@@ -132,18 +137,31 @@ mvn -B -ntp -f <独立消费者目录>/pom.xml test
 
 验证时显式指定隔离的 settings、本地仓库和本地数据库 URL。定向测试按实际新增类选择，避免单独运行 engine 模块时漏建 contract。
 
-## 后续物理依赖拆分：独立迁移阶段
+## 第二阶段：物理依赖拆分（已完成）
 
-这部分不混入第一阶段兼容重构：
+本阶段采用 `2.0.0-SNAPSHOT` 显式迁移，详见[物理拆分计划](2026-10-02-spring-physical-split.md)及[物理拆分实施结果](../../componentization/spring-physical-split.md)。第一阶段旧 Java API 与 Maven 组合的历史兼容范围保留，不承诺未经迁移的旧二进制与 2.0 混用。
 
-- [ ] 盘点所有 MVC 返回类型消费者，明确新版本的迁移范围。
-- [ ] 中立 engine 不保留 MVC 类型签名；Starter 改用中立结果；Web 适配承接 HTTP 门面。
-- [ ] 确认不存在 starter / adapter-web 循环依赖。
-- [ ] 仅在需要移除默认模型 SDK 或引入第二模型时拆可选模型制品，更新 BOM 与发布验证。
-- [ ] 以真实缺少 MVC / 默认供应方类的独立消费者证明物理隔离，不以源码搜索代替类加载验证。
+- [x] 盘点 MVC 返回类型消费者并完成迁移：Starter 的 `send` / `prepare` 返回 `AiPreparedExecution`，Controller 使用 `AiWebStreamResponseFactory.stream` 包装。
+- [x] `engine` / `starter` 真正移除 MVC、Servlet、OkHttp 与百炼实现；已有 `adapter-web` 承接三个旧低层门面、writer 和 SSE 编码器并保留 FQCN。
+- [x] 低层 Web 执行装配仅要求运行时标记与引擎开启，宿主自有 Controller 可在 `web=false` 时继续使用；内置路由仍受 Web 开关与完整 Starter 门面控制，不增加新配置键。
+- [x] 确认不存在 starter / adapter-web 循环依赖，没有新增独立 Web Starter 或兼容聚合模块。
+- [x] 仅新增可选 `ai-chat-kit-model-bailian`，迁移默认模型协议、配置、提示与生命周期，更新 BOM 及包校验；自定义模型与策略优先，默认预算保留。
+- [x] 使用真实缺少 MVC、Servlet、OkHttp 与百炼类的独立无 Web 消费者证明物理隔离；两组消费者均从冻结候选仓库加载 JAR，没有使用 reactor 类目录或过滤类加载器代替制品验证。
+- [x] 完成真实本地 PostgreSQL 回归、独立 Web 与无 Web 消费者验收、组件/POM 构建、示例独立打包及制品/依赖清单核对。
 
-若必须维持旧制品与旧方法完全兼容，则延后此阶段；不得用 optional 依赖掩盖链接失败。
+## 最终受控验收结果
+
+| 验证范围 | 结果 |
+|---|---|
+| 组件测试 | 153 项 |
+| reactor 外独立 Web 消费者 | 20 项测试；核对 8 个组件的 JAR CodeSource |
+| reactor 外独立无 Web 消费者 | 5 项测试；核对 4 个组件的 JAR CodeSource；运行 classpath 实际缺少 MVC/Servlet/OkHttp/百炼 |
+| 合计 | **178 项测试，0 失败、0 错误、0 跳过** |
+| 构建与候选 | 13 个组件/POM 项目通过，示例独立打包通过；实际候选 10 个组件 JAR |
+| 第三方依赖 | 最小 Starter 24 → 14；全组件 56 项第三方坐标、scope、hash 保持不变 |
+
+完整证据与迁移范围见[物理拆分实施结果](../../componentization/spring-physical-split.md)。整体计划的源码实施与受控验收已完成；真实宿主联调、真实模型、远程部署及公开 Release/tag 不计入本次完成声明。
 
 ## 评审重点
 
-逐阶段检查：授权是否仍必经、依赖是否单向、事务是否真实且短、生命周期是否只管理自有资源、兼容签名是否保留、验证是否来自本轮代码。评审发现差异时修正该阶段，再进行下一阶段。
+已按两阶段边界检查授权必经、单向依赖、真实短事务、资源所有权、Java 迁移范围与当前候选验证。第一阶段兼容签名和第二阶段 API 迁移分别记录，不将历史测试或 reactor 类目录当作当前独立制品证据。

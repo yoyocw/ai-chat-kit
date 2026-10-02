@@ -19,10 +19,15 @@
 
     <properties>
         <java.version>1.8</java.version>
-        <ai.version>1.2.0-SNAPSHOT</ai.version>
+        <ai.version>2.0.0-SNAPSHOT</ai.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>io.github.yoyocw</groupId>
+            <artifactId>ai-chat-kit-model-bailian</artifactId>
+            <version>${ai.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.github.yoyocw</groupId>
             <artifactId>ai-chat-kit-starter</artifactId>

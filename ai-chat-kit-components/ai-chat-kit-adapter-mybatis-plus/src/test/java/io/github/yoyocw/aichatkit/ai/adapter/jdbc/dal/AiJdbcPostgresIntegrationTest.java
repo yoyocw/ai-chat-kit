@@ -5,7 +5,6 @@ import io.github.yoyocw.aichatkit.ai.adapter.jdbc.config.AiJdbcResourcePropertie
 import io.github.yoyocw.aichatkit.ai.adapter.jdbc.config.AiJdbcResources;
 import io.github.yoyocw.aichatkit.ai.engine.transaction.AiTransactionExecutor;
 import io.github.yoyocw.aichatkit.ai.engine.transaction.AiTransactionMode;
-import io.github.yoyocw.aichatkit.module.ai.config.BailianProperties;
 import io.github.yoyocw.aichatkit.module.ai.contract.config.AiChatMode;
 import io.github.yoyocw.aichatkit.module.ai.contract.context.AiGroupAgentCatalogPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.context.AiGroupMemberSnapshot;
@@ -499,7 +498,7 @@ class AiJdbcPostgresIntegrationTest {
         return schema;
     }
     private static String randomCode() { return UUID.randomUUID().toString().replace("-", ""); }
-    private static AiConversationMemoryService memory() { return new AiConversationMemoryService(new BailianProperties()); }
+    private static AiConversationMemoryService memory() { return new AiConversationMemoryService(12, 6000, 2000, 3, 20); }
     private static AiInvocationContext actor(String namespace, String tenant, String actor) {
         return new AiInvocationContext(namespace, tenant, actor, "postgres-integration-invocation");
     }

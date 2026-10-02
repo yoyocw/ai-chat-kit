@@ -6,6 +6,7 @@ import io.github.yoyocw.aichatkit.ai.adapter.jdbc.storage.AiJdbcExecutionScopeAd
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import io.github.yoyocw.aichatkit.ai.starter.annotation.EnableAiChatKit;
 import io.github.yoyocw.aichatkit.ai.starter.host.*;
+import io.github.yoyocw.aichatkit.ai.adapter.web.AiWebStreamResponseFactory;
 import io.github.yoyocw.aichatkit.module.ai.config.BailianProperties;
 import io.github.yoyocw.aichatkit.module.ai.contract.model.*;
 import io.github.yoyocw.aichatkit.module.ai.contract.execution.AiPreparedExecution;
@@ -77,7 +78,7 @@ class AiComponentConsumerChatFlowTest {
             long conversation = management.createSingle(ACTOR);
             ModelFixture model = context.getBean(ModelFixture.class);
             model.onInvoke = message -> assertTerminal(db, message, 0);
-            StreamingResponseBody body = context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR));
             long message = assistantId(db, conversation);
             assertTerminal(db, message, 0);
             assertThat(model.calls.get()).isZero();
@@ -100,7 +101,7 @@ class AiComponentConsumerChatFlowTest {
             AiHostGroupChatService group = context.getBean(AiHostGroupChatService.class);
             long conversation = group.create("group", MEMBERS, ACTOR);
             context.getBean(ModelFixture.class).onInvoke = message -> assertTerminal(db, message, 0);
-            StreamingResponseBody body = group.send(conversation, "test question", ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(group.send(conversation, "test question", ACTOR));
             long message = assistantId(db, conversation);
             assertTerminal(db, message, 0);
             AtomicInteger memberObservations = new AtomicInteger();
@@ -149,7 +150,7 @@ class AiComponentConsumerChatFlowTest {
             model.onCancel = message -> assertTerminal(db, message, 2);
             long conversation = context.getBean(AiHostConversationManagementService.class).createSingle(ACTOR);
             AiHostSingleChatService single = context.getBean(AiHostSingleChatService.class);
-            StreamingResponseBody body = single.send(request(conversation), ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(single.send(request(conversation), ACTOR));
             long message = assistantId(db, conversation);
             ExecutorService executor = Executors.newSingleThreadExecutor();
             try {
@@ -189,7 +190,7 @@ class AiComponentConsumerChatFlowTest {
             ExecutorService worker = Executors.newSingleThreadExecutor();
             try {
                 assertThatThrownBy(() -> context.getBean(AiTransactionExecutor.class).required(() -> {
-                    body.set(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR));
+                    body.set(context.getBean(AiWebStreamResponseFactory.class).stream(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR)));
                     try {
                         worker.submit(() -> assertThatThrownBy(() -> write(body.get())).isInstanceOf(IllegalStateException.class))
                                 .get(10, TimeUnit.SECONDS);
@@ -208,7 +209,7 @@ class AiComponentConsumerChatFlowTest {
     void committedStreamingResponseCanOnlyBeConsumedOnce() throws Exception {
         withHost((context, db) -> {
             long conversation = context.getBean(AiHostConversationManagementService.class).createSingle(ACTOR);
-            StreamingResponseBody body = context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR));
             long message = assistantId(db, conversation);
             assertDone(write(body), message, 1);
             assertThatThrownBy(() -> write(body)).isInstanceOf(IllegalStateException.class);
@@ -223,7 +224,7 @@ class AiComponentConsumerChatFlowTest {
             ModelFixture model = context.getBean(ModelFixture.class);
             model.expiryCalls = 1; model.emitBeforeExpiry = true;
             long conversation = context.getBean(AiHostConversationManagementService.class).createSingle(ACTOR);
-            StreamingResponseBody body = context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR));
             long message = assistantId(db, conversation);
             String sse = write(body);
             assertDone(sse, message, 3);
@@ -240,7 +241,7 @@ class AiComponentConsumerChatFlowTest {
             ModelFixture model = context.getBean(ModelFixture.class);
             model.expiryCalls = 2;
             long conversation = context.getBean(AiHostConversationManagementService.class).createSingle(ACTOR);
-            StreamingResponseBody body = context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR));
             long message = assistantId(db, conversation);
             String sse = write(body);
             assertDone(sse, message, 3);
@@ -259,7 +260,7 @@ class AiComponentConsumerChatFlowTest {
             db.execute("CREATE TRIGGER reject_test_audit_complete BEFORE UPDATE ON ai_runtime_execution "
                     + "FOR EACH ROW EXECUTE FUNCTION reject_test_audit_complete()");
             long conversation = context.getBean(AiHostConversationManagementService.class).createSingle(ACTOR);
-            StreamingResponseBody body = context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR));
             long message = assistantId(db, conversation);
             String sse = write(body);
             assertDone(sse, message, 1);
@@ -352,7 +353,7 @@ class AiComponentConsumerChatFlowTest {
     void existingWriterBeanMayAppendFieldsInPlaceAndStillCompleteSingleChat() throws Exception {
         withHost((context, db) -> {
             long conversation = context.getBean(AiHostConversationManagementService.class).createSingle(ACTOR);
-            StreamingResponseBody body = context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR));
             long message = assistantId(db, conversation);
             String sse = write(body);
             assertDone(sse, message, 1);
@@ -377,7 +378,7 @@ class AiComponentConsumerChatFlowTest {
                 };
                 AiHostGroupChatService group = context.getBean(AiHostGroupChatService.class);
                 long conversation = group.create("retry group", MEMBERS, ACTOR);
-                StreamingResponseBody body = group.send(conversation, "test question", ACTOR);
+                StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(group.send(conversation, "test question", ACTOR));
                 long message = assistantId(db, conversation);
                 body.writeTo(output);
                 String sse = new String(output.toByteArray(), StandardCharsets.UTF_8);
@@ -406,7 +407,7 @@ class AiComponentConsumerChatFlowTest {
             rejectCompletionAudit(db);
             AiHostGroupChatService group = context.getBean(AiHostGroupChatService.class);
             long conversation = group.create("audit group", MEMBERS, ACTOR);
-            StreamingResponseBody body = group.send(conversation, "test question", ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(group.send(conversation, "test question", ACTOR));
             long message = assistantId(db, conversation);
             String sse = write(body);
             assertDone(sse, message, 1);
@@ -428,7 +429,7 @@ class AiComponentConsumerChatFlowTest {
             RestoringExecutionScope scope = context.getBean(RestoringExecutionScope.class);
             context.getBean(ModelFixture.class).onInvoke = message -> assertThat(scope.actor.get()).isEqualTo(ACTOR);
             long conversation = context.getBean(AiHostConversationManagementService.class).createSingle(ACTOR);
-            StreamingResponseBody body = context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR));
             long message = assistantId(db, conversation);
             AtomicInteger rejectedDeltas = new AtomicInteger();
             ByteArrayOutputStream acceptedOutput = new ByteArrayOutputStream();
@@ -477,7 +478,7 @@ class AiComponentConsumerChatFlowTest {
             ModelFixture model = context.getBean(ModelFixture.class);
             model.timeout = true;
             long conversation = context.getBean(AiHostConversationManagementService.class).createSingle(ACTOR);
-            StreamingResponseBody body = context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR);
+            StreamingResponseBody body = context.getBean(AiWebStreamResponseFactory.class).stream(context.getBean(AiHostSingleChatService.class).send(request(conversation), ACTOR));
             long message = assistantId(db, conversation);
             String sse = write(body);
             assertDone(sse, message, 3);

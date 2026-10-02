@@ -8,7 +8,7 @@
         <version>${revision}</version>
     </parent>
     <artifactId>ai-chat-kit-engine</artifactId>
-    <description>本地百炼模型执行运行层，不依赖AI服务宿主及业务数据库</description>
+    <description>中立对话执行与事务编排，不依赖 HTTP 传输或具体模型</description>
     <dependencies>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -16,7 +16,7 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
+            <artifactId>spring-context</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -43,10 +43,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

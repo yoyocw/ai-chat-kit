@@ -1,6 +1,5 @@
 package io.github.yoyocw.aichatkit.module.ai.service.memory;
 
-import io.github.yoyocw.aichatkit.module.ai.config.BailianProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 
@@ -14,19 +13,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AiConversationMemoryService {
 
-    /** 百炼历史窗口和 Token 估算校准配置。 */
+    /** 历史窗口和 Token 估算校准配置。 */
     private final int recentCount;
     private final int maxTokens;
     private final int summaryMaxTokens;
     private final int asciiCharsPerToken;
     private final int safetyPercent;
-
-    /** 兼容默认模型的历史配置；内部只保留中立预算快照。 */
-    public AiConversationMemoryService(BailianProperties properties) {
-        this(properties.getHistoryRecentMessageCount(), properties.getHistoryMaxTokens(),
-                properties.getHistorySummaryMaxTokens(), properties.getHistoryAsciiCharsPerToken(),
-                properties.getHistoryTokenSafetyPercent());
-    }
 
     /**
      * 构建本轮历史上下文，并在消息超过近期窗口时推进持久化摘要。
@@ -86,7 +78,7 @@ public class AiConversationMemoryService {
         return value;
     }
 
-    /** 组合稳定旧记忆与最近原文，使百炼提示词能区分两类上下文。 */
+    /** 组合稳定旧记忆与最近原文，使模型提示词能区分两类上下文。 */
     private String buildContext(String summary, List<String> recentLines) {
         StringBuilder context = new StringBuilder();
         if (StringUtils.hasText(summary)) {

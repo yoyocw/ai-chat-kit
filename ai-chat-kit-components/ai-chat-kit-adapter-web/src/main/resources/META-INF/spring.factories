@@ -1,2 +1,3 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=io.github.yoyocw.aichatkit.ai.adapter.web.AiWebAutoConfiguration
-
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+ io.github.yoyocw.aichatkit.ai.adapter.web.AiWebExecutionAutoConfiguration,\
+ io.github.yoyocw.aichatkit.ai.adapter.web.AiWebAutoConfiguration

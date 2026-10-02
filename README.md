@@ -7,7 +7,8 @@
 | 组件 | 职责 |
 |---|---|
 | `ai-chat-kit-contract` | 中立接口与身份、存储、授权契约 |
-| `ai-chat-kit-engine` | 对话与执行流程 |
+| `ai-chat-kit-engine` | 中立对话执行与事务编排 |
+| `ai-chat-kit-model-bailian` | 可选百炼模型协议与客户端 |
 | `ai-chat-kit-starter` | 注解激活与自动装配 |
 | `ai-chat-kit-adapter-web` | HTTP 与 SSE 入口 |
 | `ai-chat-kit-adapter-mybatis-plus` | MyBatis-Plus 实现的 AI 自有 PostgreSQL 存储 |
@@ -18,15 +19,17 @@
 
 Maven group 为 `io.github.yoyocw`，核心 Java 包为 `io.github.yoyocw.aichatkit`。源码集中在 `ai-chat-kit-components`，不再包含平台通用框架、旧业务服务和 FAC。身份适配复用宿主已有认证，不把宿主框架复制进组件。
 
-默认构建 8 个中立组件；平台宿主和若依宿主分别按需构建。独立的契约、存储、Web 和工具适配边界保留，使用方只选择需要的 JAR。
+默认构建 9 个组件制品；平台宿主和若依宿主分别按需构建。独立的契约、存储、Web 和工具适配边界保留，使用方只选择需要的 JAR。
 
 ## 架构设计
 
-框架采用 Spring 的依赖注入、条件装配和事务回调：模型 SPI 可替换默认适配，中立执行句柄在事务提交后消费，旧发送入口继续兼容。第一阶段重构及 153 项本地测试已完成，迁移范围见 [实施结果](docs/componentization/spring-refactor.md)；整体边界见 [设计](docs/superpowers/specs/2026-10-02-spring-framework-design.md) 与 [计划](docs/superpowers/plans/2026-10-02-spring-framework-design.md)。MVC 与默认模型 SDK 的物理制品拆分留待后续阶段。
+框架采用 Spring 的依赖注入、条件装配和事务回调。`engine` 与 `starter` 不再依赖 MVC、Servlet、OkHttp 或百炼实现；Web 输出由 `adapter-web` 提供，默认模型由 `model-bailian` 提供。只使用中立能力时可省略这两个制品。
+
+`2.0.0-SNAPSHOT` 包含 Java 接口与依赖迁移，具体用法见 [完整重构说明](docs/componentization/spring-physical-split.md)。[第一阶段结果](docs/componentization/spring-refactor.md)保留其当时证据；整体依据见 [设计](docs/superpowers/specs/2026-10-02-spring-framework-design.md)。
 
 ## 接入
 
-引入同版本 `ai-chat-kit-starter`、Web/MyBatis-Plus 及所需适配组件，在启动类添加：
+引入同版本 `ai-chat-kit-starter`、MyBatis-Plus 及所需适配组件。使用 HTTP/SSE 时加入 `ai-chat-kit-adapter-web`，使用百炼时加入 `ai-chat-kit-model-bailian`；自定义模型无需百炼依赖。在启动类添加：
 
 ```java
 import io.github.yoyocw.aichatkit.ai.starter.annotation.EnableAiChatKit;
@@ -44,31 +47,31 @@ public class Application {
 
 组件默认关闭。设置 `ai-chat-kit.ai.engine.enabled=true`，并配置模型、应用目录、存储和真实授权。平台宿主可额外引入 `ai-chat-kit-host-platform`，使用 `platform-host.mode=in-process`；原宿主包根通过部署环境提供，不写死在组件中。支持的宿主由组件提供所需身份端口，业务模块不需要手写 AI 适配代码。
 
-完整依赖和配置见 [接入示例](examples/ai-engine-host/README.md)。任意其他登录框架仍需匹配的宿主适配器，不可用测试身份代替真实认证。
+完整依赖和配置见 [HTTP 接入示例](examples/ai-engine-host/README.md)；无 Web、自定义模型用法见 [独立中立消费者](examples/ai-headless-consumer/README.md)。任意其他登录框架仍需匹配的宿主适配器，不可用测试身份代替真实认证。
 
 持久化统一使用 MyBatis-Plus：五张 `ai_runtime_*` 表对应实体和 `BaseMapper`，会话锁、状态条件更新与分享有效期校验保留。组件内部持有独立会话工厂，不接管宿主 Mapper 扫描或插件；无需额外配置 `@MapperScan`。模块名为 `ai-chat-kit-adapter-mybatis-plus`，原有 `storage.jdbc` 配置继续兼容，数据库仍为 PostgreSQL。实现与验证见[存储迁移说明](docs/componentization/mybatis-plus-migration.md)。
 
 ## 构建
 
-使用 JDK 8、Maven 3.9。当前开发候选版本为 `1.2.0-SNAPSHOT`。
+使用 JDK 8、Maven 3.9。当前开发候选版本为 `2.0.0-SNAPSHOT`。
 
 ```sh
 # 中立组件
-mvn -B -ntp -Drevision=1.2.0-SNAPSHOT clean install
+mvn -B -ntp -Drevision=2.0.0-SNAPSHOT clean install
 
 # 增加平台宿主适配
-mvn -B -ntp -Pai-platform-host -Drevision=1.2.0-SNAPSHOT clean install
+mvn -B -ntp -Pai-platform-host -Drevision=2.0.0-SNAPSHOT clean install
 
 # 增加若依宿主适配；先准备匹配的宿主 provided 制品
-mvn -B -ntp -Pai-ruoyi-host -Drevision=1.2.0-SNAPSHOT clean install
+mvn -B -ntp -Pai-ruoyi-host -Drevision=2.0.0-SNAPSHOT clean install
 ```
 
 普通组件发布为薄 JAR、sources JAR 和独立 POM。每个 JAR 包含 `META-INF/LICENSE`。平台宿主包不需要平台兼容 JAR；若依宿主的 provided 依赖由已有宿主提供。
 
 ```powershell
-./scripts/component-release/verify-package.ps1 -Repository <Maven仓库目录> -Version 1.2.0-SNAPSHOT
+./scripts/component-release/verify-package.ps1 -Repository <Maven仓库目录> -Version 2.0.0-SNAPSHOT
 # 同时验证平台宿主包
-./scripts/component-release/verify-package.ps1 -Repository <Maven仓库目录> -Version 1.2.0-SNAPSHOT -IncludePlatformHost
+./scripts/component-release/verify-package.ps1 -Repository <Maven仓库目录> -Version 2.0.0-SNAPSHOT -IncludePlatformHost
 ```
 
 第三方依赖由配置的 Maven 仓库解析。主工程不需要地理库、消息队列、服务注册中心或平台 ORM 框架。若依适配所需的宿主资源不代表所有组件的运行依赖。

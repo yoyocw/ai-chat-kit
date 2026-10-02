@@ -2,7 +2,7 @@ package io.github.yoyocw.aichatkit.module.ai.adapter.plain;
 
 import io.github.yoyocw.aichatkit.module.ai.contract.context.AiBusinessPresentation;
 import io.github.yoyocw.aichatkit.module.ai.contract.context.AiSingleResponseDataPort;
-import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianCitationSupport;
+import io.github.yoyocw.aichatkit.module.ai.framework.citation.AiCitationSupport;
 import io.github.yoyocw.aichatkit.module.ai.framework.json.AiEngineJson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -27,7 +27,7 @@ public final class AiPlainSingleResponseDataAdapter implements AiSingleResponseD
             throw new IllegalArgumentException("纯聊天展示仅接受引用信封");
         }
         JsonNode raw = output == null ? null : AiEngineJson.parseTree(output);
-        ArrayNode references = BailianCitationSupport.merge(previous == null ? null : AiPlainResponseEnvelope.references(previous),
+        ArrayNode references = AiCitationSupport.merge(previous == null ? null : AiPlainResponseEnvelope.references(previous),
                 raw == null ? null : raw.path("doc_references"));
         if (references.isEmpty()) { return null; }
         return AiPlainResponseEnvelope.create(TYPE_ANSWER_SOURCES, AiEngineJson.createObjectNode(), references).toString();

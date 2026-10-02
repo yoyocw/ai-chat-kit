@@ -14,7 +14,8 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.core.env.Environment;
 
 /** 显式Web开关才装配；没有注解、引擎或完整门面时明确启动失败，不默默缺失路由。 */
-@AutoConfiguration(afterName = "io.github.yoyocw.aichatkit.ai.starter.autoconfigure.AiStarterAutoConfiguration")
+@AutoConfiguration(after = AiWebExecutionAutoConfiguration.class,
+        afterName = "io.github.yoyocw.aichatkit.ai.starter.autoconfigure.AiStarterAutoConfiguration")
 @ConditionalOnBean(type = "io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiRuntimeActivation")
 @ConditionalOnProperty(prefix = "ai-chat-kit.ai", name = {"engine.enabled", "web.enabled"}, havingValue = "true")
 @EnableConfigurationProperties({AiWebProperties.class, AiStarterProperties.class})
@@ -37,8 +38,9 @@ public class AiWebAutoConfiguration {
     @ConditionalOnMissingBean(AiWebSingleController.class)
     public AiWebSingleController aiWebSingleController(AiWebActivation activation, AiWebIdentity identity,
             AiHostSingleChatService execution, AiHostConversationManagementService management,
-            AiHostConversationShareService shares, AiPublicConversationShareService publicShares) {
-        return new AiWebSingleController(activation, identity, execution, management, shares, publicShares);
+            AiHostConversationShareService shares, AiPublicConversationShareService publicShares,
+            AiWebStreamResponseFactory responses) {
+        return new AiWebSingleController(activation, identity, execution, management, shares, publicShares, responses);
     }
     /** @return 可选群聊完整路由 */
     @Bean
@@ -47,8 +49,8 @@ public class AiWebAutoConfiguration {
     public AiWebGroupController aiWebGroupController(AiWebActivation activation, AiWebIdentity identity,
             AiHostGroupChatService execution, AiHostConversationManagementService management,
             AiHostConversationShareService shares, AiPublicConversationShareService publicShares,
-            AiHostGroupAgentService agents) {
-        return new AiWebGroupController(activation, identity, execution, management, shares, publicShares, agents);
+            AiHostGroupAgentService agents, AiWebStreamResponseFactory responses) {
+        return new AiWebGroupController(activation, identity, execution, management, shares, publicShares, agents, responses);
     }
     /** @return 仅针对本模块的安全异常响应 */
     @Bean

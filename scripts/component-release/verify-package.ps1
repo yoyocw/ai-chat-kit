@@ -3,7 +3,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Repository,
 
-    [string]$Version = "1.2.0-SNAPSHOT",
+    [string]$Version = "2.0.0-SNAPSHOT",
 
     [switch]$IncludePlatformHost
 )
@@ -18,6 +18,7 @@ $neutralArtifacts = @(
     "ai-chat-kit-mcp-jwt",
     "ai-chat-kit-contract",
     "ai-chat-kit-engine",
+    "ai-chat-kit-model-bailian",
     "ai-chat-kit-starter",
     "ai-chat-kit-adapter-web",
     "ai-chat-kit-adapter-mybatis-plus",
@@ -54,6 +55,15 @@ $results = foreach ($artifactId in $artifacts) {
         if ($entryNames | Where-Object { $_ -like "BOOT-INF/*" }) {
             throw "$artifactId contains BOOT-INF entries and is not a thin component JAR"
         }
+        if ($artifactId -in @('ai-chat-kit-contract', 'ai-chat-kit-engine', 'ai-chat-kit-starter')) {
+            if ($entryNames | Where-Object {
+                    $_ -like '*/framework/bailian/*' -or $_ -like '*/config/BailianProperties.class' -or
+                    $_ -like '*/AiSseEventEncoder.class' -or $_ -like '*/AiChatStreamEventWriter.class' -or
+                    $_ -like '*/AiChatExecutionService.class' -or $_ -like '*/AiGroupChatExecutionService.class' -or
+                    $_ -like '*/AiGroupChatStreamService.class' }) {
+                throw "$artifactId contains an optional model or MVC implementation"
+            }
+        }
         if ($entryNames -notcontains "META-INF/LICENSE") {
             throw "$artifactId does not contain META-INF/LICENSE"
         }
@@ -81,6 +91,11 @@ $results = foreach ($artifactId in $artifacts) {
     foreach ($dependency in $publishedPom.SelectNodes("/*[local-name()='project']/*[local-name()='dependencies']/*[local-name()='dependency']")) {
         $dependencyGroup = $dependency.SelectSingleNode("./*[local-name()='groupId']").InnerText.Trim()
         $dependencyArtifact = $dependency.SelectSingleNode("./*[local-name()='artifactId']").InnerText.Trim()
+        if ($artifactId -in @('ai-chat-kit-contract', 'ai-chat-kit-engine', 'ai-chat-kit-starter') -and
+                $dependencyArtifact -in @('ai-chat-kit-adapter-web', 'ai-chat-kit-model-bailian',
+                    'spring-web', 'spring-webmvc', 'spring-boot-starter-web', 'javax.servlet-api', 'jakarta.servlet-api', 'okhttp')) {
+            throw "$artifactId declares forbidden optional implementation dependency $dependencyArtifact"
+        }
         if ($dependencyGroup -eq 'io.github.yoyocw' -and $dependencyArtifact -notin $neutralArtifacts) {
             throw "$artifactId published POM references a non-neutral project artifact $dependencyArtifact"
         }

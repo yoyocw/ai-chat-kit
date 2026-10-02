@@ -10,8 +10,8 @@ import io.github.yoyocw.aichatkit.ai.starter.host.AiHostConversationShareService
 import io.github.yoyocw.aichatkit.ai.starter.host.AiPublicConversationShareService;
 import io.github.yoyocw.aichatkit.module.ai.service.chat.AiConversationShareService;
 import io.github.yoyocw.aichatkit.module.ai.service.chat.AiConversationManagementService;
-import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatExecutionService;
-import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatExecutionService;
+import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatExecutor;
+import io.github.yoyocw.aichatkit.module.ai.service.chat.AiSingleChatExecutor;
 import io.github.yoyocw.aichatkit.module.ai.contract.authorization.AiHostPermissionPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiHostSessionPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiInvocationContextPort;
@@ -98,9 +98,9 @@ public class AiStarterAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(AiHostGroupChatService.class)
     @ConditionalOnBean({AiInvocationContextPort.class, AiHostSessionPort.class,
-            AiHostPermissionPort.class, AiGroupChatExecutionService.class})
+            AiHostPermissionPort.class, AiGroupChatExecutor.class})
     public AiHostGroupChatService aiHostGroupChatService(AiHostAuthenticationBridge authenticationBridge,
-                                                        AiGroupChatExecutionService executionService) {
+                                                        AiGroupChatExecutor executionService) {
         return new AiHostGroupChatService(authenticationBridge, executionService);
     }
 
@@ -113,9 +113,9 @@ public class AiStarterAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(AiHostSingleChatService.class)
     @ConditionalOnBean({AiInvocationContextPort.class, AiHostSessionPort.class,
-            AiHostPermissionPort.class, AiChatExecutionService.class})
+            AiHostPermissionPort.class, AiSingleChatExecutor.class})
     public AiHostSingleChatService aiHostSingleChatService(AiHostAuthenticationBridge authenticationBridge,
-                                                          AiChatExecutionService executionService) {
+                                                          AiSingleChatExecutor executionService) {
         return new AiHostSingleChatService(authenticationBridge, executionService);
     }
 

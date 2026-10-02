@@ -1,6 +1,6 @@
 package io.github.yoyocw.aichatkit.module.ai.adapter.plain;
 
-import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianCitationSupport;
+import io.github.yoyocw.aichatkit.module.ai.framework.citation.AiCitationSupport;
 import io.github.yoyocw.aichatkit.module.ai.framework.json.AiEngineJson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -18,7 +18,7 @@ final class AiPlainResponseEnvelope {
         ObjectNode result = AiEngineJson.createObjectNode();
         result.put("schemaVersion", SCHEMA_VERSION_V1); result.put("type", type); result.set("data", data);
         ArrayNode sources = result.putArray("sources");
-        for (JsonNode reference : BailianCitationSupport.merge(null, references)) {
+        for (JsonNode reference : AiCitationSupport.merge(null, references)) {
             ObjectNode source = sources.addObject();
             source.put("indexId", reference.path("index_id").asText()); source.put("sourceType", "DOCUMENT_REFERENCE");
             source.put("title", reference.path("title").asText());
@@ -40,6 +40,6 @@ final class AiPlainResponseEnvelope {
             reference.set("index_id", source.path("indexId")); reference.set("title", source.path("title"));
             reference.set("doc_url", source.path("url"));
         }
-        return BailianCitationSupport.merge(null, references);
+        return AiCitationSupport.merge(null, references);
     }
 }

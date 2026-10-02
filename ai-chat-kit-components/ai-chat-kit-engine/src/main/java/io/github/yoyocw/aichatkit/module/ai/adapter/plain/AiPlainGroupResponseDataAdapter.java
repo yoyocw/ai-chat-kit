@@ -1,7 +1,8 @@
 package io.github.yoyocw.aichatkit.module.ai.adapter.plain;
 
 import io.github.yoyocw.aichatkit.module.ai.contract.context.AiGroupResponseDataPort;
-import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianGroupOutputException;
+import io.github.yoyocw.aichatkit.module.ai.contract.model.AiModelException;
+import static io.github.yoyocw.aichatkit.module.ai.contract.error.AiExecutionError.GROUP_WORKFLOW_OUTPUT_INVALID;
 import io.github.yoyocw.aichatkit.module.ai.framework.json.AiEngineJson;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -34,5 +35,8 @@ public final class AiPlainGroupResponseDataAdapter implements AiGroupResponseDat
     }
 
     /** 异常仅含固定安全说明，不携带完整模型响应。 */
-    private BailianGroupOutputException invalid() { return new BailianGroupOutputException("工作流 responseData 不符合安全扩展结果契约"); }
+    private IllegalArgumentException invalid() {
+        return new IllegalArgumentException(GROUP_WORKFLOW_OUTPUT_INVALID.getMsg(),
+                new AiModelException(GROUP_WORKFLOW_OUTPUT_INVALID, false));
+    }
 }

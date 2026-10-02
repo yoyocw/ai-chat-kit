@@ -4,7 +4,6 @@ import io.github.yoyocw.aichatkit.ai.adapter.jdbc.config.AiJdbcResources;
 import io.github.yoyocw.aichatkit.ai.adapter.jdbc.dal.AiJdbcAccess;
 import io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiRuntimeActivationConfiguration;
 import io.github.yoyocw.aichatkit.ai.engine.transaction.AiTransactionExecutor;
-import io.github.yoyocw.aichatkit.module.ai.config.BailianProperties;
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiHostExecutionScopePort;
 import io.github.yoyocw.aichatkit.module.ai.service.chat.AiStopOriginPrecheckService;
 import io.github.yoyocw.aichatkit.module.ai.service.memory.AiConversationMemoryService;
@@ -201,7 +200,7 @@ class AiJdbcActivationBoundaryTest {
     @Configuration(proxyBeanMethods = false)
     static class MemoryService {
         @Bean
-        AiConversationMemoryService memory() { return new AiConversationMemoryService(new BailianProperties()); }
+        AiConversationMemoryService memory() { return new AiConversationMemoryService(12, 6000, 2000, 3, 20); }
     }
 
     static final class CountingDataSource extends AbstractDataSource implements AutoCloseable {

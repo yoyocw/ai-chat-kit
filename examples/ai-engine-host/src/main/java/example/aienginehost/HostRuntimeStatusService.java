@@ -1,7 +1,6 @@
 package example.aienginehost;
 
 import io.github.yoyocw.aichatkit.module.ai.adapter.config.YamlApplicationConfigAdapter;
-import io.github.yoyocw.aichatkit.module.ai.config.BailianProperties;
 import io.github.yoyocw.aichatkit.module.ai.contract.audit.AiExecutionAuditPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.config.AiApplicationConfigPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.context.AiGroupResponseDataPort;
@@ -14,11 +13,9 @@ import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiGroupChatStreamSt
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatCompletionPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatPreparePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatStatePort;
-import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianClient;
-import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianGroupOutputParser;
-import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatExecutionService;
-import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatStreamEventWriter;
-import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatStreamService;
+import io.github.yoyocw.aichatkit.module.ai.contract.model.AiModelClient;
+import io.github.yoyocw.aichatkit.module.ai.service.chat.AiSingleChatExecutor;
+import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatStreamExecutor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -45,9 +42,9 @@ public class HostRuntimeStatusService {
      * @return 当前装配快照，不代表权限、事务、数据库或远端模型运行验证结果
      */
     public HostEngineStatusRespVO getStatus() {
-        return new HostEngineStatusRespVO(hasBean(BailianClient.class),
+        return new HostEngineStatusRespVO(hasBean(AiModelClient.class),
                 hasBean(YamlApplicationConfigAdapter.class), hasBean(AiApplicationConfigPort.class),
-                hasBean(AiChatExecutionService.class), hasBean(AiGroupChatStreamService.class),
+                hasBean(AiSingleChatExecutor.class), hasBean(AiGroupChatStreamExecutor.class),
                 missingSingleDependencies(), missingGroupDependencies());
     }
 
@@ -55,15 +52,15 @@ public class HostRuntimeStatusService {
     private List<String> missingSingleDependencies() {
         return missingDependencies(AiSingleChatStatePort.class, AiInvocationContextPort.class,
                 AiHostExecutionScopePort.class, AiSingleChatCompletionPort.class, AiSingleChatPreparePort.class,
-                BailianClient.class, AiApplicationConfigPort.class, BailianProperties.class,
-                AiSingleChatBusinessPort.class, AiChatStreamEventWriter.class, AiSingleResponseDataPort.class,
+                AiModelClient.class, AiApplicationConfigPort.class,
+                AiSingleChatBusinessPort.class, AiSingleResponseDataPort.class,
                 AiExecutionAuditPort.class, AiMessageOriginPort.class, AiTransactionExecutor.class);
     }
 
     /** @return 群聊流执行自动配置所需、当前未装配的依赖类型；同步鉴权不属于该流服务 */
     private List<String> missingGroupDependencies() {
         return missingDependencies(AiHostExecutionScopePort.class, AiGroupChatStreamStatePort.class,
-                BailianClient.class, BailianGroupOutputParser.class, AiGroupResponseDataPort.class,
+                AiModelClient.class, AiGroupResponseDataPort.class,
                 AiExecutionAuditPort.class);
     }
 

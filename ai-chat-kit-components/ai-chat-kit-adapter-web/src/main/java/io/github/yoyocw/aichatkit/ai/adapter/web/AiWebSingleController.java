@@ -24,6 +24,8 @@ public class AiWebSingleController {
     private final AiWebIdentity identity;
     /** 已授权执行门面。 */
     private final AiHostSingleChatService execution;
+    /** 中立执行转为MVC响应。 */
+    private final AiWebStreamResponseFactory responses;
     /** 会话管理门面。 */
     private final AiHostConversationManagementService management;
     /** 登录用户分享管理门面。 */
@@ -35,8 +37,9 @@ public class AiWebSingleController {
      * @param shares 分享管理 @param publicShares 公开读取 */
     public AiWebSingleController(AiWebActivation activation, AiWebIdentity identity, AiHostSingleChatService execution,
             AiHostConversationManagementService management, AiHostConversationShareService shares,
-            AiPublicConversationShareService publicShares) {
+            AiPublicConversationShareService publicShares, AiWebStreamResponseFactory responses) {
         java.util.Objects.requireNonNull(activation, "activation");
+        this.responses = java.util.Objects.requireNonNull(responses, "responses");
         this.identity = identity; this.execution = execution; this.management = management;
         this.shares = shares; this.publicShares = publicShares;
     }
@@ -101,7 +104,7 @@ public class AiWebSingleController {
     @PostMapping(value = "/message/send", produces = "text/event-stream")
     public StreamingResponseBody send(@Valid @RequestBody AiWebSingleSendRequest request) {
         // 地图默认关闭；显式请求交由真实宿主业务扩展处理，默认plain适配器负责拒绝不支持的能力。
-        return execution.send(request, identity.currentActor());
+        return responses.stream(execution.send(request, identity.currentActor()));
     }
 
     /** @param messageId 正数助手消息编号 @return 停止成功 */

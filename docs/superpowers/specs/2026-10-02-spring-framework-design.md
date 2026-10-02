@@ -1,8 +1,10 @@
 # AI Chat Kit：基于 Spring 思想的整体设计
 
 日期：2026-10-02
-代码基线：`717a6d7b9a65f153a68253d6524b7b9ddadfc827`
-状态：**第一阶段兼容重构已实施；物理依赖拆分尚未实施。** 实际代码、迁移与测试证据见[实施结果](../../componentization/spring-refactor.md)。
+设计代码基线：`717a6d7b9a65f153a68253d6524b7b9ddadfc827`
+状态：**整体计划已完成，包含第一阶段兼容重构与后续物理依赖拆分。** 当前版本为 `2.0.0-SNAPSHOT`；第一阶段历史证据见[兼容重构实施结果](../../componentization/spring-refactor.md)，当前制品边界、API 迁移与验证见[物理拆分实施结果](../../componentization/spring-physical-split.md)。
+
+当前 `engine` / `starter` 的物理依赖不含 MVC、Servlet、OkHttp 或百炼实现；唯一新增的可选制品为 `ai-chat-kit-model-bailian`，现有 `adapter-web` 承接旧 MVC 门面和 SSE 输出。受控验证共 178 项测试（153 项组件、20 项独立 Web、5 项独立无 Web），失败、错误、跳过均为 0；13 个组件/POM 项目及示例独立打包通过。实际候选含 10 个 JAR，独立 Web / 无 Web 消费者分别核对 8 / 4 个组件的 JAR CodeSource。最小 Starter 第三方运行依赖从 24 项降至 14 项；全组件的 56 项第三方依赖坐标、scope 与 hash 保持一致。
 
 ## 1. 目标与取舍
 
@@ -18,11 +20,11 @@
 | 按真实替换边界提取接口，Spring 装配默认实现 | 能逐步消除耦合，并保留接入兼容；每一步可独立验证 | **采用** |
 | 通用插件内核、任意责任链、统一抽象基类 | 配置、调试和维护成本高，超出当前需求 | 不采用 |
 
-第一阶段保持现有模块数量与公开入口，通过组合实现内部隔离。物理依赖拆分放到明确的兼容迁移阶段，不能把“类已依赖接口”描述成“JAR 已移除依赖”。
+实施分为两个已完成阶段：第一阶段保持当时的模块数量与公开入口，通过组合实现内部隔离；第二阶段按 `2.0.0-SNAPSHOT` 显式迁移 Java API 并完成制品拆分。第一阶段的历史设计与验证范围保留，不作为当前依赖树的描述。
 
 ## 2. 设计基线与主要缺口
 
-| 当前事实 | 设计决定 |
+| 设计时源码事实（历史基线） | 设计决定 |
 |---|---|
 | contract 无第三方依赖，已有身份、授权、存储等 Port | 保留中立契约；只为可替换边界补充接口 |
 | Starter 已有 marker、总开关、延迟自动配置与最终容器校验 | 沿用；不扩大组件扫描 |
@@ -35,11 +37,11 @@
 | `BailianClient.close()` 已回收资源，但新调用登记缺少关闭状态协调 | 补齐停止接收、取消在途、资源释放的并发边界 |
 | hosted-proxy 当前实现双身份停止协调 | 保持这一职责；完整远程聊天策略属于后续能力 |
 
-以上是设计时的源码基线，保留用于说明改动动机。本轮实施与验证结果另见[实施结果](../../componentization/spring-refactor.md)。
+以上是设计时的源码基线，保留用于说明改动动机。第一阶段变化见[兼容重构实施结果](../../componentization/spring-refactor.md)，当前物理边界见[物理拆分实施结果](../../componentization/spring-physical-split.md)。
 
 ## 3. 整体结构
 
-下图表示**逻辑职责和调用关系**，不是当前 Maven 依赖树。第一阶段兼容门面仍与引擎处于现有制品中。
+下图表示**逻辑职责和调用关系**，不是 Maven 依赖树。第一阶段将兼容门面留在 engine 的做法已结束；当前门面位于 `adapter-web`，模型实现位于 `model-bailian`，具体制品依赖见[物理拆分实施结果](../../componentization/spring-physical-split.md)。
 
 ```mermaid
 flowchart TB
@@ -71,15 +73,15 @@ flowchart TB
 | 模块 | 职责与约束 |
 |---|---|
 | `contract` | 不可变请求/结果、身份和能力接口；不引入 Spring MVC、MyBatis、模型 SDK |
-| `engine` | 执行编排、状态推进、事务协调；新内核不引用供应方协议或 SSE |
-| `starter` | 显式启用、配置聚合、接入门面和完整性诊断；不承载数据库实现 |
-| `adapter-web` | 参数绑定、HTTP 状态、SSE 编码及断连处理；不做持久化状态推进 |
+| `engine` | 中立执行编排、状态推进、事务协调；整个制品不依赖 MVC、Servlet、OkHttp 或百炼实现 |
+| `starter` | 显式启用、接入门面和完整性诊断；发送/准备返回 `AiPreparedExecution`，不依赖 MVC、Servlet、OkHttp 或百炼实现 |
+| `adapter-web` | 参数绑定、HTTP 状态、SSE 编码、旧 MVC 门面及响应工厂；低层包装随引擎激活，内置路由仍由 `web.enabled` 控制 |
 | `adapter-mybatis-plus` | 五张 AI 自有表、行锁、条件更新、资源绑定；不接管宿主 Mapper 扫描 |
 | `adapter-mcp-jwt-v1` | 每轮应用/工具授权、凭据签发；身份错误必须拒绝 |
 | `mcp-jwt` | JWT 协议与验证能力；不依赖具体宿主 |
 | `adapter-hosted-proxy` | 保持现有双身份停止协调；不承担本地模型调用 |
 | `host-*` | 复用对应宿主认证、权限及代理；不将宿主框架引入通用契约 |
-| 模型适配包 | 第一阶段在现有 engine 内，后续需要移除 SDK 传递依赖时再拆可选制品 |
+| `model-bailian` | 唯一新增可选制品，承接百炼协议、配置、提示、客户端及默认模型装配；宿主自定义 `AiModelClient` 优先 |
 
 表中模块名省略共同前缀 `ai-chat-kit-`。不新增通用 framework/common 模块。
 
@@ -99,28 +101,28 @@ flowchart TB
 
 ## 5. 模型调用 SPI
 
-建议新增 `contract.model` 下的中立模型契约，名称为设计候选，尚不存在：
+已实现 `contract.model` 下的中立模型契约：
 
 - `AiModelClient`：应用能力校验、流式执行、按 executionId 取消。
 - `AiModelRequest`：配置选择、提示内容、会话续接信息、不可公开的本轮调用凭据。
 - `AiModelEvent` / `AiModelResult`：内容增量、终态、会话标识和用量。
-- `AiModelFailure`：明确区分取消、会话失效、超时、不可恢复协议失败。
+- `AiModelException` / `AiModelSessionExpiredException`：明确区分取消、会话失效、超时、不可恢复协议失败（原设计候选名为 `AiModelFailure`）。
 
 适配器负责供应方应用 ID 规则、HTTP 协议、原生事件/异常转换及连接资源。供应方会话 ID 对内核只是不透明值。供应方提示词和群聊输出协议留在适配包。
 
 凭据只存在于受限的本轮调用对象与适配器内，不进入日志、toString、SSE、持久化事件、用户响应或可序列化通用 DTO；授权判断始终由独立授权 Port 完成。
 
-第一阶段只有默认百炼实现。普通用户通过默认 Bean 即可运行；替换模型的扩展开发者才实现该 SPI。模型调用配置与执行策略配置分离，例如 stale 判定属于执行策略，不能继续直接读取供应方 Properties。
+默认百炼实现现由可选 `model-bailian` 提供；使用该默认实现的宿主需显式引入该制品。自定义模型宿主实现并提供 `AiModelClient`，无需安装百炼或 Web 制品。模型调用配置与中立执行策略分离；供应方默认策略先于中立预算退让装配，保留既有过期与记忆预算语义。
 
-兼容的旧构造器/方法可委托适配器，但不可重新创建第二套 HTTP 连接池。由 Spring 注入的客户端仍由其拥有者关闭。
+物理拆分后的 Java API 迁移见[物理拆分实施结果](../../componentization/spring-physical-split.md)。中立内核不再保留供应方构造依赖，也不创建 HTTP 连接池；模型适配器的客户端仍由其资源拥有者关闭。
 
 ## 6. 中立输出与执行模板
 
-新增小型事件接收接口与“已准备执行”的句柄：同步入口完成授权与准备。若 REQUIRED 加入宿主外层事务，入口返回并不代表已提交；句柄可以返回，但只能在真实提交后消费，回滚后失效，提前消费明确拒绝。通过事务同步标记就绪与失效，不使用 REQUIRES_NEW 提前提交。流消费保持当前异步执行范围恢复语义。
+已新增小型事件接收接口 `AiExecutionEventSink` 与“已准备执行”句柄 `AiPreparedExecution`：同步入口完成授权与准备。若 REQUIRED 加入宿主外层事务，入口返回并不代表已提交；句柄可以返回，但只能在真实提交后消费，回滚后失效，提前消费明确拒绝。通过事务同步标记就绪与失效，不使用 REQUIRES_NEW 提前提交。流消费保持当前异步执行范围恢复语义。
 
 事件至少能表达当前的开始、内容、成员回复、错误与结束，并保存现有事件顺序与字段。内部事件是一次调用内的类型化回调，不是全局 Spring 事件总线。
 
-过渡期旧 `StreamingResponseBody` 方法委托新入口并连接 SSE 编码器；SSE 写出细节集中一个位置，断连、取消、完成失败的处理沿用现有语义。异步回调必须使用已捕获的可信上下文，并在执行范围结束后清理线程状态。
+第一阶段旧 `StreamingResponseBody` 方法曾留在 engine 中委托中立入口。当前这些低层 MVC 门面与编码器位于 `adapter-web`，保留其 FQCN；Starter 门面的 `send` / `prepare` 返回 `AiPreparedExecution`。`AiWebStreamResponseFactory.stream(prepared)` 将句柄转换为响应，调用可替换 writer 前复制事件数据，HTTP/SSE 路径、字段与状态语义保持。异步回调使用已捕获的可信上下文，并在执行范围结束后清理线程状态。
 
 固定流程如下：
 
@@ -170,7 +172,7 @@ Hosted 停止协调最终调用 AiConsumedStopPort，当前仓库没有该 Port 
 
 装配层次为：显式激活 → 所选资源与适配器 → 执行服务 → 接入门面 → 可选 Web → 最终完整性诊断。实际配置用明确的 before/after 关系表达，不能依赖 imports 文本顺序；Bean 创建顺序由依赖决定。
 
-- 继续要求启用注解与总开关。未启用时不创建 AI 业务 Bean、数据库池、模型客户端或路由。
+- 继续要求显式运行时激活与总开关。未激活或总开关关闭时不创建 AI 业务 Bean、数据库池、模型客户端或低层 Web 包装。`AiWebExecutionAutoConfiguration` 仅要求运行时标记与引擎开启，供宿主自有 Controller 使用；`AiWebAutoConfiguration` 的内置路由额外要求 Web 开关、Starter 与完整门面，不增加新配置键。
 - 保持 imports 自动发现和已有兼容注册；配置重排后验证没有重复实例。应用扫描不负责发现组件内部实现。
 - 普通替换点使用 `@ConditionalOnMissingBean`，必要时用 `ObjectProvider` 注入可选能力；缺少和候选冲突分别报错。
 - 保留各装配边界的既有候选选择规则：Starter 当前的普通单值注入允许 `@Primary` 消歧；MCP 安全装配中使用 `AiMcpV1Beans.unique` 的端口继续严格唯一。不将两者描述为同一规则，也不在本阶段统一收紧。不得用 first、默认实现或 `getIfUnique` 的 null 返回掩盖未解决的候选冲突。
@@ -181,11 +183,11 @@ Hosted 停止协调最终调用 AiConsumedStopPort，当前仓库没有该 Port 
 
 ## 9. 兼容迁移与轻量边界
 
-第一阶段保持模块坐标、配置键、HTTP/SSE 字段与既有发送方法签名，内置宿主保持原接入方式。自定义旧授权扩展需要迁到独立授权 Port；直接构造执行器的高级使用方也需按新增依赖迁移，不能承诺所有旧构造器行为零改动。新接口使内部编排可以独立于供应方和传输测试，但 `engine` 的物理依赖仍可能含 MVC、OkHttp，文档和依赖报告必须如实列出。
+第一阶段曾保持模块坐标和既有 MVC 发送方法签名，同时新增中立内核；当时 engine 仍有 MVC / OkHttp 物理依赖。这一历史兼容范围见[第一阶段实施结果](../../componentization/spring-refactor.md)，不代表当前制品边界。
 
-彻底移除依赖不能与保留原制品中 MVC 类型签名同时完成。后续采用显式版本迁移：新 engine 保留中立 API，HTTP 方法进入 Web 接入边界，Starter 门面改为中立结果；旧调用方按迁移表更新或选择兼容制品。不要制造 `starter → adapter-web → starter` 环。
+当前 `2.0.0-SNAPSHOT` 完成显式版本迁移：`engine` 提供中立执行器，Starter 门面直接注入这些执行器并返回 `AiPreparedExecution`；旧低层 MVC 门面、writer 与 SSE 编码器进入已有 `adapter-web`，默认百炼实现进入唯一新增的可选 `model-bailian`。原 `writeBailianEvent` API 改为接收合同事件的 `writeModelEvent(AiModelEvent)`。配置键、HTTP/SSE 路径及协议保持；Java 返回类型、构造依赖和 Maven 组合按[迁移说明](../../componentization/spring-physical-split.md)更新。
 
-若用户要求旧 Maven 消费方式零改动，应推迟物理移除，而不是标 optional 后宣称兼容。若确有第二种模型或 SDK 体积收益，可新增一个可选百炼适配制品；该变化独立评估 BOM、Starter 默认依赖和发布清单。
+没有新增兼容聚合制品或独立 Web Starter，也没有 `starter → adapter-web → starter` 循环。Web 与无 Web 消费者均在 reactor 外使用冻结候选 JAR 验证；无 Web 消费者实际 classpath 缺少 MVC、Servlet、OkHttp 与百炼类，不能以 optional 标记、源码搜索或过滤类加载器代替这一证据。
 
 框架设计不承诺任意宿主零适配；内置支持的宿主保持无手写 AI 适配代码。用户只实现其确需替换的能力，不要求逐个补齐所有 Port。
 
@@ -200,21 +202,23 @@ Hosted 停止协调最终调用 AiConsumedStopPort，当前仓库没有该 Port 
 | 输出 | SSE 字段与顺序不变；单聊恢复限制、群聊完成后输出、断连清理 |
 | 生命周期 | 关闭与调用登记交错时无漏取消；重复关闭安全；借用宿主资源不被关闭 |
 | 存储 | MyBatis-Plus 独立会话工厂；真实本地 PostgreSQL 回归覆盖锁与事务语义 |
-| 兼容 | 内置宿主及旧发送方法消费者编译运行；旧自定义授权扩展有明确迁移用例；新入口可无 HTTP 输出；独立消费者使用候选 JAR 而非 reactor 类目录 |
-| 体积 | 第一阶段无新增框架依赖、无新增 Maven 模块；物理依赖移除需单独证明 |
+| 兼容 | 宿主适配与迁移后的消费者编译运行；低层旧 MVC 门面可供自有 Controller 使用；中立入口可无 HTTP 输出；独立消费者使用候选 JAR 而非 reactor 类目录 |
+| 体积 | 物理移除由独立无 Web 消费者证明；最小 Starter 第三方依赖 24 → 14；全组件 56 项第三方坐标/scope/hash 不变；唯一新增模块为可选 `model-bailian` |
 
-本轮只交付设计与实施计划。现有历史测试记录保留其原始范围，不作为新设计已实现的证据；真实宿主联调、部署和发布另行计入。
+整体设计已实现并完成上述受控验收。当前证据为 178 项测试全部通过且无跳过、13 个组件/POM 项目构建通过、示例独立打包通过及两组候选 JAR 消费者验证；详见[物理拆分实施结果](../../componentization/spring-physical-split.md)。真实宿主联调、真实模型、远程部署与公开 Release 不属于本次完成声明。
 
 ## 11. 源码与官方依据
 
-源码入口（均为上述基线）：
+当前源码入口（设计动机仍以上述历史基线为准）：
 
 - [Starter 激活与装配](../../../ai-chat-kit-components/ai-chat-kit-starter/src/main/java/io/github/yoyocw/aichatkit/ai/starter/autoconfigure/AiStarterAutoConfiguration.java)
-- [单聊执行器](../../../ai-chat-kit-components/ai-chat-kit-engine/src/main/java/io/github/yoyocw/aichatkit/module/ai/service/chat/AiChatExecutionService.java)
-- [群聊流执行器](../../../ai-chat-kit-components/ai-chat-kit-engine/src/main/java/io/github/yoyocw/aichatkit/module/ai/service/groupchat/AiGroupChatStreamService.java)
+- [单聊执行器](../../../ai-chat-kit-components/ai-chat-kit-engine/src/main/java/io/github/yoyocw/aichatkit/module/ai/service/chat/AiSingleChatExecutor.java)
+- [群聊流执行器](../../../ai-chat-kit-components/ai-chat-kit-engine/src/main/java/io/github/yoyocw/aichatkit/module/ai/service/groupchat/AiGroupChatStreamExecutor.java)
 - [真实事务模板](../../../ai-chat-kit-components/ai-chat-kit-engine/src/main/java/io/github/yoyocw/aichatkit/ai/engine/transaction/AiTransactionExecutor.java)
 - [存储资源所有权](../../../ai-chat-kit-components/ai-chat-kit-adapter-mybatis-plus/src/main/java/io/github/yoyocw/aichatkit/ai/adapter/jdbc/config/AiJdbcResources.java)
-- [模型客户端生命周期](../../../ai-chat-kit-components/ai-chat-kit-engine/src/main/java/io/github/yoyocw/aichatkit/module/ai/framework/bailian/BailianClient.java)
+- [模型客户端生命周期](../../../ai-chat-kit-components/ai-chat-kit-model-bailian/src/main/java/io/github/yoyocw/aichatkit/module/ai/framework/bailian/BailianClient.java)
+- [Web 低层执行装配](../../../ai-chat-kit-components/ai-chat-kit-adapter-web/src/main/java/io/github/yoyocw/aichatkit/ai/adapter/web/AiWebExecutionAutoConfiguration.java)
+- [物理拆分实施结果与迁移](../../componentization/spring-physical-split.md)
 - [分阶段实施计划](../plans/2026-10-02-spring-framework-design.md)
 
 Spring 官方依据：Boot 2.7 支持条件自动配置与用户 Bean 覆盖，自动配置发现应独立于包扫描，简单 Starter 无需强制拆为两个模块。见 [Boot 2.7.18 自动配置](https://docs.spring.io/spring-boot/docs/2.7.18/reference/html/features.html#features.developing-auto-configuration)。`getIfUnique` 对缺失与非唯一都可能返回 null，见 [ObjectProvider 5.3.39](https://docs.spring.io/spring-framework/docs/5.3.39/javadoc-api/org/springframework/beans/factory/ObjectProvider.html)。SmartLifecycle 适用于需要启动/关闭阶段和异步停止回调的组件，见 [生命周期 API](https://docs.spring.io/spring-framework/docs/5.3.39/javadoc-api/org/springframework/context/SmartLifecycle.html)。

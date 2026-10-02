@@ -29,6 +29,15 @@ class AiStarterCandidateSelectionTest {
             assertFalse(missing.contains("AiInvocationContextPort（存在多个候选）"), missing);
         }
     }
+    @Test void verifierRequiresNeutralExecutorsWithoutMvcCapabilities() {
+        try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+            context.refresh();
+            String missing = missingCapabilities(context);
+            assertTrue(missing.contains("AiSingleChatExecutor"), missing);
+            assertFalse(missing.contains("AiChatExecutionService"), missing);
+            assertFalse(missing.contains("AiChatStreamEventWriter"), missing);
+        }
+    }
     private static String missingCapabilities(AnnotationConfigApplicationContext context) {
         AiStarterProperties properties = new AiStarterProperties();
         properties.setNamespace("test-namespace");

@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AiWebActivationBoundaryTest {
     private final WebApplicationContextRunner runner = new WebApplicationContextRunner()
             .withUserConfiguration(HostMvc.class)
-            .withConfiguration(AutoConfigurations.of(AiWebAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(AiWebExecutionAutoConfiguration.class, AiWebAutoConfiguration.class));
 
     @Test
     void propertiesWithoutEnableAnnotationDoNotCreateWebBeansOrRequireHostConfiguration() {
@@ -69,13 +69,27 @@ class AiWebActivationBoundaryTest {
     }
 
     private void assertWebAbsent(AssertableWebApplicationContext context) {
+        assertExecutionAbsent(context);
+        assertBuiltInWebAbsent(context);
+    }
+
+    private void assertExecutionAbsent(AssertableWebApplicationContext context) {
+        assertThat(context).hasNotFailed()
+                .doesNotHaveBean(AiWebStreamResponseFactory.class)
+                .doesNotHaveBean(io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatStreamEventWriter.class)
+                .doesNotHaveBean(io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatExecutionService.class)
+                .doesNotHaveBean(io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatExecutionService.class)
+                .doesNotHaveBean(io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatStreamService.class);
+    }
+
+    private void assertBuiltInWebAbsent(AssertableWebApplicationContext context) {
         assertThat(context).hasNotFailed()
                 .doesNotHaveBean(AiWebActivation.class)
                 .doesNotHaveBean(AiWebIdentity.class)
                 .doesNotHaveBean(AiWebSingleController.class)
                 .doesNotHaveBean(AiWebGroupController.class)
                 .doesNotHaveBean(AiWebErrorAdvice.class);
-        // Verify the actual MVC registry as well as bean absence: disabled AI has no HTTP surface.
+        // Verify that built-in routes are absent; independently activated hosts may still use low-level wrappers.
         assertThat(context.getBean(RequestMappingHandlerMapping.class).getHandlerMethods().values())
                 .noneMatch(handler -> AiWebSingleController.class.isAssignableFrom(handler.getBeanType())
                         || AiWebGroupController.class.isAssignableFrom(handler.getBeanType()));

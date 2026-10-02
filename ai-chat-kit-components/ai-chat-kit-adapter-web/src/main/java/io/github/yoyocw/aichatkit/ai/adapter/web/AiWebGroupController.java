@@ -24,6 +24,8 @@ public class AiWebGroupController {
     private final AiWebIdentity identity;
     /** 已授权执行门面。 */
     private final AiHostGroupChatService execution;
+    /** 中立执行转为MVC响应。 */
+    private final AiWebStreamResponseFactory responses;
     /** 会话管理门面。 */
     private final AiHostConversationManagementService management;
     /** 登录用户分享管理门面。 */
@@ -37,8 +39,9 @@ public class AiWebGroupController {
      * @param shares 分享管理 @param publicShares 公开读取 @param agents 成员目录 */
     public AiWebGroupController(AiWebActivation activation, AiWebIdentity identity, AiHostGroupChatService execution,
             AiHostConversationManagementService management, AiHostConversationShareService shares,
-            AiPublicConversationShareService publicShares, AiHostGroupAgentService agents) {
+            AiPublicConversationShareService publicShares, AiHostGroupAgentService agents, AiWebStreamResponseFactory responses) {
         java.util.Objects.requireNonNull(activation, "activation");
+        this.responses = java.util.Objects.requireNonNull(responses, "responses");
         this.identity = identity; this.execution = execution; this.management = management;
         this.shares = shares; this.publicShares = publicShares; this.agents = agents;
     }
@@ -117,7 +120,7 @@ public class AiWebGroupController {
     /** @param request 本轮问题 @return 已同步认证准备的SSE，不添加异步身份捕获 */
     @PostMapping(value = "/message/send", produces = "text/event-stream")
     public StreamingResponseBody send(@Valid @RequestBody AiWebGroupSendRequest request) {
-        return execution.send(request.getConversationId(), request.getContent(), identity.currentActor());
+        return responses.stream(execution.send(request.getConversationId(), request.getContent(), identity.currentActor()));
     }
 
     /** @param messageId 正数助手消息编号 @return 停止成功 */

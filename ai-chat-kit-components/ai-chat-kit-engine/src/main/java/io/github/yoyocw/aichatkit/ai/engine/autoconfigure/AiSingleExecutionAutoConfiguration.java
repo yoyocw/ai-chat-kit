@@ -15,8 +15,6 @@ import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatComplet
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatPreparePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatStatePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.model.AiModelClient;
-import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatExecutionService;
-import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatStreamEventWriter;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -38,11 +36,6 @@ import io.github.yoyocw.aichatkit.ai.engine.transaction.AiTransactionExecutor;
                 "com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration"})
 @ConditionalOnProperty(prefix = "ai-chat-kit.ai.engine", name = "enabled", havingValue = "true")
 public class AiSingleExecutionAutoConfiguration {
-    /** @return 现有SSE输出实现，不携带业务数据库依赖。 */
-    @Bean
-    @ConditionalOnMissingBean
-    public AiChatStreamEventWriter aiChatStreamEventWriter() { return new AiChatStreamEventWriter(); }
-
     /**
      * 端口齐备时创建单聊引擎，使用宿主事务管理器保持准备/来源/审计的本地事务。
      * 参数均为宿主合同或本地模型组件，不从远程AI代理获取结果。
@@ -64,11 +57,4 @@ public class AiSingleExecutionAutoConfiguration {
                 business, authorization, response, audit, origin, transactions);
     }
 
-    /** Existing public MVC service delegates to the neutral core. */
-    @Bean
-    @ConditionalOnMissingBean(AiChatExecutionService.class)
-    @ConditionalOnBean(AiSingleChatExecutor.class)
-    public AiChatExecutionService aiChatExecutionService(AiSingleChatExecutor executor, AiChatStreamEventWriter writer) {
-        return new AiChatExecutionService(executor, writer);
-    }
 }

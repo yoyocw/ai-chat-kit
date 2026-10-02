@@ -22,7 +22,7 @@
         <tag>HEAD</tag>
     </scm>
     <properties>
-        <revision>1.2.0-SNAPSHOT</revision>
+        <revision>2.0.0-SNAPSHOT</revision>
         <flatten-maven-plugin.version>1.7.2</flatten-maven-plugin.version>
         <spring.framework.version>5.3.39</spring.framework.version>
         <spring.security.version>5.8.16</spring.security.version>
@@ -35,6 +35,11 @@
     </properties>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.github.yoyocw</groupId>
+                <artifactId>ai-chat-kit-model-bailian</artifactId>
+                <version>${revision}</version>
+            </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring</artifactId>

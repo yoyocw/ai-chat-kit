@@ -4,7 +4,7 @@
 
 ## 接入步骤
 
-1. 参考本目录pom.xml引入同版本的starter、adapter-web、adapter-mybatis-plus及按需应用授权/MCP适配依赖。本地候选版本为`1.2.0-SNAPSHOT`，正式发布应使用可追溯制品。
+1. 参考本目录pom.xml引入同版本的starter、adapter-web、model-bailian、adapter-mybatis-plus及按需应用授权/MCP适配依赖。本地候选版本为`2.0.0-SNAPSHOT`，正式发布应使用可追溯制品。
 2. 在目标项目配置类或启动类添加`@EnableAiChatKit`。只扫描宿主自己的包，不要求扫描平台业务包。
 3. 参考application.yaml设置固定namespace、所选模式、应用/模型/成员目录与存储；秘密由部署环境注入。
 4. 通用宿主需引入适配当前宿主的身份包，或实现真实身份捕获、会话复核、权限及必要业务接口。满足下述框架版本前提的平台项目可选择`ai-chat-kit-host-platform`，由组件提供身份、会话、权限和普通入口来源端口，无需另写 AI Port。

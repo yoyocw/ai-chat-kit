@@ -8,8 +8,7 @@ import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityException;
 import io.github.yoyocw.aichatkit.module.ai.contract.context.AiSingleChatRequest;
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiHostSession;
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiInvocationContext;
-import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatExecutionService;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import io.github.yoyocw.aichatkit.module.ai.service.chat.AiSingleChatExecutor;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -23,7 +22,7 @@ public final class AiHostSingleChatService {
     /** 实时核验宿主身份、会话及固定操作权限。 */
     private final AiHostAuthenticationBridge authenticationBridge;
     /** Spring 容器中绑定显式事务执行器的单聊引擎，不能使用手工构造的无事务实例。 */
-    private final AiChatExecutionService executionService;
+    private final AiSingleChatExecutor executionService;
 
     /**
      * @param authenticationBridge 宿主认证边界
@@ -31,27 +30,26 @@ public final class AiHostSingleChatService {
      * @throws NullPointerException 任一服务缺失
      */
     public AiHostSingleChatService(AiHostAuthenticationBridge authenticationBridge,
-                                  AiChatExecutionService executionService) {
+                                  AiSingleChatExecutor executionService) {
         this.authenticationBridge = Objects.requireNonNull(authenticationBridge, "宿主认证桥接不能为空");
         this.executionService = Objects.requireNonNull(executionService, "单聊引擎不能为空");
     }
 
     /**
-     * 授权发送并完成引擎同步准备；宿主在事务提交后交给 MVC 执行流式响应。
+     * 授权发送并完成引擎同步准备；宿主在事务提交后消费中立执行事件。
      * @param request 用户问题及会话参数，由引擎继续校验及检查资源归属
      * @param expectedActorId 仅用于与真实登录用户核对的预期标识，不提供登录能力
-     * @return 引擎流式响应，沿用其可信作用域和异常收口
+     * @return 准备完成的中立执行，沿用其可信作用域和异常收口
      * @throws IllegalStateException 认证失败或授权与执行身份不一致
      */
-    public StreamingResponseBody send(AiSingleChatRequest request, String expectedActorId) {
-        AiHostSession session = authenticationBridge.authorizeCurrent(expectedActorId, AiHostAction.CHAT_SEND);
-        return executionService.sendMessageForContext(request, expectedContext(session));
+    public AiPreparedExecution send(AiSingleChatRequest request, String expectedActorId) {
+        return prepare(request, expectedActorId);
     }
 
     /** Authorize and prepare synchronously; consume only after the actual transaction commit. */
     public AiPreparedExecution prepare(AiSingleChatRequest request, String expectedActorId) {
         AiHostSession session = authenticationBridge.authorizeCurrent(expectedActorId, AiHostAction.CHAT_SEND);
-        return executionService.prepareMessageForContext(request, expectedContext(session));
+        return executionService.sendMessageForContext(request, expectedContext(session));
     }
 
     /**

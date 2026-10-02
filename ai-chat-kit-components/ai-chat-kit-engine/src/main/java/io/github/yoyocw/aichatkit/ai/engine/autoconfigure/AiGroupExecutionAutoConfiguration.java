@@ -8,8 +8,6 @@ import io.github.yoyocw.aichatkit.module.ai.contract.context.AiGroupResponseData
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiHostExecutionScopePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiGroupChatStreamStatePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.model.AiModelClient;
-import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatStreamService;
-import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatExecutionService;
 import io.github.yoyocw.aichatkit.module.ai.config.AiExecutionPolicy;
 import io.github.yoyocw.aichatkit.module.ai.contract.authorization.AiInvocationAuthorizationPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.config.AiApplicationConfigPort;
@@ -70,17 +68,4 @@ public class AiGroupExecutionAutoConfiguration {
         return new AiGroupChatExecutor(identities, applications, authorization, preparation, stream, client, properties, audit, origins, transactions);
     }
 
-    @Bean
-    @ConditionalOnMissingBean(AiGroupChatStreamService.class)
-    @ConditionalOnBean(AiGroupChatStreamExecutor.class)
-    public AiGroupChatStreamService aiGroupChatStreamService(AiGroupChatStreamExecutor executor) {
-        return new AiGroupChatStreamService(executor);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(AiGroupChatExecutionService.class)
-    @ConditionalOnBean(AiGroupChatExecutor.class)
-    public AiGroupChatExecutionService aiGroupChatExecutionService(AiGroupChatExecutor executor) {
-        return new AiGroupChatExecutionService(executor);
-    }
 }
