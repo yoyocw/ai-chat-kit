@@ -8,7 +8,7 @@
 2. 五张表映射为实体和 BaseMapper；普通 CRUD 使用 Wrapper 绑定参数。分享 UPDATE RETURNING 和来源 INSERT SELECT 保留为命名参数 Mapper SQL。
 3. 独立 SqlSessionFactory/SqlSessionTemplate 只由 AI 持有器管理，不作为宿主全局 Bean；同源 Spring 事务连接复用。一级缓存按语句清理，禁用二级缓存及 SQL 日志。
 4. 所有身份查询显式限定 namespace、tenant_id、actor_id、mode、deleted；保留 FOR UPDATE、生成态条件更新、分享最终有效性检查和数据库时钟。
-5. 保持模块坐标 ai-chat-kit-adapter-jdbc、postgresql 存储类型、reuse/reference/isolated 配置与现有 SQL 不变。数据库仍为 PostgreSQL。
+5. 模块目录和 Maven 坐标统一为 `ai-chat-kit-adapter-mybatis-plus`。保留 postgresql 存储类型、reuse/reference/isolated 配置与现有 SQL；数据库仍为 PostgreSQL。
 
 ## 验收
 
@@ -41,8 +41,14 @@ mvn -B -ntp -Pai-platform-host clean install
 mvn -B -ntp -f examples/ai-component-consumer/pom.xml test
 ```
 
-未设置该变量会跳过真实数据库用例，不能据此声称数据库回归通过。持久化迁移无需新增 SQL；已建 `ai_runtime_*` 表可继续使用。模块名和 Java 存储适配包中的 `jdbc` 表示数据库传输及资源边界，实际查询已全部改为 MyBatis-Plus。业务接入继续使用契约端口和 Starter；内部 DAL 的旧 `jdbc()`/参数数组接口已移除。
+未设置该变量会跳过真实数据库用例，不能据此声称数据库回归通过。持久化迁移无需新增 SQL；已建 `ai_runtime_*` 表可继续使用。模块名统一为 `ai-chat-kit-adapter-mybatis-plus`。Java 存储适配包及 `storage.jdbc` 配置键继续兼容，实际查询全部使用 MyBatis-Plus。业务接入继续使用契约端口和 Starter；内部 DAL 的旧 `jdbc()`/参数数组接口已移除。
 
 若依宿主仍按需构建，本轮未重跑其独立宿主验收。MyBatis-Plus 引入后宿主需避免将其版本强制降级；本轮验证版本为 MyBatis-Plus 3.5.15、MyBatis 3.5.19、mybatis-spring 2.1.2。
 
 设计依据：[MyBatis-Plus 安装说明](https://baomidou.com/getting-started/install/)、[MyBatis 数据变更返回结果](https://mybatis.org/mybatis-3/sqlmap-xml.html)、[MyBatis 本地缓存](https://mybatis.org/mybatis-3/java-api.html)。
+
+## 模块命名统一
+
+模块目录、Maven artifactId、BOM、聚合构建、两个接入示例及发布校验脚本统一使用 `ai-chat-kit-adapter-mybatis-plus`。已有接入方需要将存储依赖的 artifactId 同步切换，版本保持 `1.2.0-SNAPSHOT`；不同时引入旧坐标与新坐标。此处仅调整模块命名，不改变业务接口或数据库结构。
+
+更名后使用新的候选缓存重新构建：101 项组件测试及 8 项独立消费者测试全部通过，无失败、错误或跳过。9 个组件的制品及源码包校验通过；新 JAR 的 Maven 元数据、消费者类路径均使用新坐标，候选缓存中无旧存储坐标 JAR。验证记录在 `.verification/mybatis-plus-module-rename`，此前迁移记录保留。

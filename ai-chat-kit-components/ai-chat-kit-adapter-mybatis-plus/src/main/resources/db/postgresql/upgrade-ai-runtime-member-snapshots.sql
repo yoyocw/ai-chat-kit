@@ -1,6 +1,6 @@
 -- AI 自有表最小增量；在应用使用新列之前执行。仅改变 ai_runtime_member，不操作旧林业表。
 -- PowerShell 执行示例（使用受控连接环境，不将密码写入命令）：
--- 从仓库根目录执行：psql -X -v ON_ERROR_STOP=1 -f "ai-chat-kit-components/ai-chat-kit-adapter-jdbc/src/main/resources/db/postgresql/upgrade-ai-runtime-member-snapshots.sql"
+-- 从仓库根目录执行：psql -X -v ON_ERROR_STOP=1 -f "ai-chat-kit-components/ai-chat-kit-adapter-mybatis-plus/src/main/resources/db/postgresql/upgrade-ai-runtime-member-snapshots.sql"
 -- 本脚本可重复执行；旧行保持 NULL，不以 agent_code 或虚构职责填充。
 -- 旧活跃会话须由管理员依据真实目录/历史资料逐行核对后回填；也可经已授权成员更新入口重新选择成员，形成新的真实快照。
 -- 未补全前列表逐会话标记 INCOMPLETE，成员详情为空并保留原编码；已授权成员更新可重新选择真实成员恢复。

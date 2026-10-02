@@ -92,7 +92,7 @@
             </dependency>
             <dependency>
                 <groupId>io.github.yoyocw</groupId>
-                <artifactId>ai-chat-kit-adapter-jdbc</artifactId>
+                <artifactId>ai-chat-kit-adapter-mybatis-plus</artifactId>
                 <version>${revision}</version>
             </dependency>
             <dependency>

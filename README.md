@@ -10,7 +10,7 @@
 | `ai-chat-kit-engine` | 对话与执行流程 |
 | `ai-chat-kit-starter` | 注解激活与自动装配 |
 | `ai-chat-kit-adapter-web` | HTTP 与 SSE 入口 |
-| `ai-chat-kit-adapter-jdbc` | MyBatis-Plus 实现的 AI 自有 PostgreSQL 存储 |
+| `ai-chat-kit-adapter-mybatis-plus` | MyBatis-Plus 实现的 AI 自有 PostgreSQL 存储 |
 | `ai-chat-kit-adapter-mcp-jwt-v1` | 应用与工具范围授权、凭据签发 |
 | `ai-chat-kit-adapter-hosted-proxy` | 可选宿主代理与停止协议 |
 | `ai-chat-kit-mcp-jwt` | 中立 JWT 协议 |
@@ -22,7 +22,7 @@ Maven group 为 `io.github.yoyocw`，核心 Java 包为 `io.github.yoyocw.aichat
 
 ## 接入
 
-引入同版本 `ai-chat-kit-starter`、Web/JDBC 及所需适配组件，在启动类添加：
+引入同版本 `ai-chat-kit-starter`、Web/MyBatis-Plus 及所需适配组件，在启动类添加：
 
 ```java
 import io.github.yoyocw.aichatkit.ai.starter.annotation.EnableAiChatKit;
@@ -42,7 +42,7 @@ public class Application {
 
 完整依赖和配置见 [接入示例](examples/ai-engine-host/README.md)。任意其他登录框架仍需匹配的宿主适配器，不可用测试身份代替真实认证。
 
-持久化统一使用 MyBatis-Plus：五张 `ai_runtime_*` 表对应实体和 `BaseMapper`，会话锁、状态条件更新与分享有效期校验保留。组件内部持有独立会话工厂，不接管宿主 Mapper 扫描或插件；无需额外配置 `@MapperScan`。模块名和原有 `storage.jdbc` 配置兼容，数据库仍为 PostgreSQL。实现与验证见[存储迁移说明](docs/componentization/mybatis-plus-migration.md)。
+持久化统一使用 MyBatis-Plus：五张 `ai_runtime_*` 表对应实体和 `BaseMapper`，会话锁、状态条件更新与分享有效期校验保留。组件内部持有独立会话工厂，不接管宿主 Mapper 扫描或插件；无需额外配置 `@MapperScan`。模块名为 `ai-chat-kit-adapter-mybatis-plus`，原有 `storage.jdbc` 配置继续兼容，数据库仍为 PostgreSQL。实现与验证见[存储迁移说明](docs/componentization/mybatis-plus-migration.md)。
 
 ## 构建
 

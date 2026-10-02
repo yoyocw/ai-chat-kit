@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-components</artifactId><version>${revision}</version></parent>
-    <artifactId>ai-chat-kit-adapter-jdbc</artifactId>
+    <artifactId>ai-chat-kit-adapter-mybatis-plus</artifactId>
     <description>AI 自有 MyBatis-Plus / PostgreSQL 持久化适配</description>
     <dependencies>
         <dependency><groupId>com.baomidou</groupId><artifactId>mybatis-plus-spring</artifactId></dependency>

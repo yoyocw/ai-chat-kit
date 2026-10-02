@@ -17,7 +17,7 @@
         <module>ai-chat-kit-engine</module>
         <module>ai-chat-kit-starter</module>
         <module>ai-chat-kit-adapter-web</module>
-        <module>ai-chat-kit-adapter-jdbc</module>
+        <module>ai-chat-kit-adapter-mybatis-plus</module>
         <module>ai-chat-kit-adapter-mcp-jwt-v1</module>
         <module>ai-chat-kit-adapter-hosted-proxy</module>
         <module>ai-chat-kit-mcp-jwt</module>

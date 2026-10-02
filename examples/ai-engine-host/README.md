@@ -4,7 +4,7 @@
 
 ## 接入步骤
 
-1. 参考本目录pom.xml引入同版本的starter、adapter-web、adapter-jdbc及按需应用授权/MCP适配依赖。本地候选版本为`1.2.0-SNAPSHOT`，正式发布应使用可追溯制品。
+1. 参考本目录pom.xml引入同版本的starter、adapter-web、adapter-mybatis-plus及按需应用授权/MCP适配依赖。本地候选版本为`1.2.0-SNAPSHOT`，正式发布应使用可追溯制品。
 2. 在目标项目配置类或启动类添加`@EnableAiChatKit`。只扫描宿主自己的包，不要求扫描平台业务包。
 3. 参考application.yaml设置固定namespace、所选模式、应用/模型/成员目录与存储；秘密由部署环境注入。
 4. 通用宿主需引入适配当前宿主的身份包，或实现真实身份捕获、会话复核、权限及必要业务接口。满足下述框架版本前提的平台项目可选择`ai-chat-kit-host-platform`，由组件提供身份、会话、权限和普通入口来源端口，无需另写 AI Port。
@@ -57,7 +57,7 @@ ai-chat-kit:
 ```xml
 <dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-starter</artifactId><version>${ai.version}</version></dependency>
 <dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-adapter-web</artifactId><version>${ai.version}</version></dependency>
-<dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-adapter-jdbc</artifactId><version>${ai.version}</version></dependency>
+<dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-adapter-mybatis-plus</artifactId><version>${ai.version}</version></dependency>
 <dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-host-platform</artifactId><version>${ai.version}</version></dependency>
 <dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-adapter-mcp-jwt-v1</artifactId><version>${ai.version}</version></dependency>
 ```
@@ -125,7 +125,7 @@ ai-chat-kit:
 
 ## 存量数据与旧入口
 
-JDBC 组件创建和读取的是`ai_runtime_*`新存储。它与旧 server/MyBatis 使用的`ai_chat_*`、`ai_group_chat_*`数据模型不同，分享结构也不同；接入组件不会自动迁移历史会话、群成员快照或分享记录，也不会让新分享继承旧分享链接。
+MyBatis-Plus 组件创建和读取的是`ai_runtime_*`新存储。它与旧 server/MyBatis 使用的`ai_chat_*`、`ai_group_chat_*`数据模型不同，分享结构也不同；接入组件不会自动迁移历史会话、群成员快照或分享记录，也不会让新分享继承旧分享链接。
 
 首次共存接入应保留旧 server/MyBatis 的历史与分享读取链路，并让组件 Web 使用独立前缀`/admin-api/ai-component`。切换旧入口、迁移旧表或兼容分享需要另行评审和真实数据验证。`reuse`或`reference`只描述数据库连接与事务资源复用，不表示新旧表结构兼容。
 

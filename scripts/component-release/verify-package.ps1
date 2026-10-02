@@ -20,7 +20,7 @@ $neutralArtifacts = @(
     "ai-chat-kit-engine",
     "ai-chat-kit-starter",
     "ai-chat-kit-adapter-web",
-    "ai-chat-kit-adapter-jdbc",
+    "ai-chat-kit-adapter-mybatis-plus",
     "ai-chat-kit-adapter-mcp-jwt-v1",
     "ai-chat-kit-adapter-hosted-proxy"
 )
