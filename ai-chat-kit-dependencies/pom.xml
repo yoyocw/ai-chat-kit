@@ -29,10 +29,22 @@
         <spring.boot.version>2.7.18</spring.boot.version>
         <mockito-inline.version>4.11.0</mockito-inline.version>
         <lombok.version>1.18.42</lombok.version>
+        <mybatis-plus.version>3.5.15</mybatis-plus.version>
+        <mybatis-spring.version>2.1.2</mybatis-spring.version>
         <okhttp.version>4.12.0</okhttp.version>
     </properties>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-spring</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis-spring.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.github.yoyocw</groupId>
                 <artifactId>ai-chat-kit-adapter-hosted-proxy</artifactId>

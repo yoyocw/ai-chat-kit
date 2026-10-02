@@ -10,7 +10,7 @@
 | `ai-chat-kit-engine` | 对话与执行流程 |
 | `ai-chat-kit-starter` | 注解激活与自动装配 |
 | `ai-chat-kit-adapter-web` | HTTP 与 SSE 入口 |
-| `ai-chat-kit-adapter-jdbc` | AI 自有 PostgreSQL 存储 |
+| `ai-chat-kit-adapter-jdbc` | MyBatis-Plus 实现的 AI 自有 PostgreSQL 存储 |
 | `ai-chat-kit-adapter-mcp-jwt-v1` | 应用与工具范围授权、凭据签发 |
 | `ai-chat-kit-adapter-hosted-proxy` | 可选宿主代理与停止协议 |
 | `ai-chat-kit-mcp-jwt` | 中立 JWT 协议 |
@@ -41,6 +41,8 @@ public class Application {
 组件默认关闭。设置 `ai-chat-kit.ai.engine.enabled=true`，并配置模型、应用目录、存储和真实授权。平台宿主可额外引入 `ai-chat-kit-host-platform`，使用 `platform-host.mode=in-process`；原宿主包根通过部署环境提供，不写死在组件中。支持的宿主由组件提供所需身份端口，业务模块不需要手写 AI 适配代码。
 
 完整依赖和配置见 [接入示例](examples/ai-engine-host/README.md)。任意其他登录框架仍需匹配的宿主适配器，不可用测试身份代替真实认证。
+
+持久化统一使用 MyBatis-Plus：五张 `ai_runtime_*` 表对应实体和 `BaseMapper`，会话锁、状态条件更新与分享有效期校验保留。组件内部持有独立会话工厂，不接管宿主 Mapper 扫描或插件；无需额外配置 `@MapperScan`。模块名和原有 `storage.jdbc` 配置兼容，数据库仍为 PostgreSQL。实现与验证见[存储迁移说明](docs/componentization/mybatis-plus-migration.md)。
 
 ## 构建
 
@@ -75,4 +77,4 @@ mvn -B -ntp -Pai-ruoyi-host -Drevision=1.2.0-SNAPSHOT clean install
 - 模型、数据库和密钥由部署环境配置，不分发本地环境文件、真实凭据或依赖缓存。
 - 构建和隔离测试不等同真实业务联调或生产部署验收。
 
-本轮结构变化、验证结果及升级事项见 [项目精简结果](docs/componentization/slimming-results.md)。此前 Preview 的制品和验证记录保持不变；主分支更新不等同发布新版本。许可见 [LICENSE](LICENSE)。
+最新存储实现及验证见 [MyBatis-Plus 迁移](docs/componentization/mybatis-plus-migration.md)，此前结构精简见 [项目精简结果](docs/componentization/slimming-results.md)。此前 Preview 的制品和验证记录保持不变；主分支更新不等同发布新版本。许可见 [LICENSE](LICENSE)。

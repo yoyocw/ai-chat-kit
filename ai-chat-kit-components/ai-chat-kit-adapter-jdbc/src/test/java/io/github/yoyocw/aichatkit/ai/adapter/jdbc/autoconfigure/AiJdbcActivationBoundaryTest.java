@@ -23,6 +23,9 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.SqlSessionTemplate;
+import io.github.yoyocw.aichatkit.ai.adapter.jdbc.mapper.AiConversationMapper;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -178,6 +181,9 @@ class AiJdbcActivationBoundaryTest {
     private void assertNoChildGlobalCandidates(AssertableApplicationContext context) {
         assertThat(context.getSourceApplicationContext().getBeansOfType(DataSource.class)).isEmpty();
         assertThat(context.getSourceApplicationContext().getBeansOfType(PlatformTransactionManager.class)).isEmpty();
+        assertThat(context.getSourceApplicationContext().getBeansOfType(SqlSessionFactory.class)).isEmpty();
+        assertThat(context.getSourceApplicationContext().getBeansOfType(SqlSessionTemplate.class)).isEmpty();
+        assertThat(context.getSourceApplicationContext().getBeansOfType(AiConversationMapper.class)).isEmpty();
     }
 
     private void assertJdbcAbsent(AssertableApplicationContext context) {

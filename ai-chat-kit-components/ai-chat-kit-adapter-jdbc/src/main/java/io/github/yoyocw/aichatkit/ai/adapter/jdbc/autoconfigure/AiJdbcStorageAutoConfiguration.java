@@ -1,6 +1,7 @@
 package io.github.yoyocw.aichatkit.ai.adapter.jdbc.autoconfigure;
 
 import io.github.yoyocw.aichatkit.ai.adapter.jdbc.dal.AiJdbcAccess;
+import io.github.yoyocw.aichatkit.ai.adapter.jdbc.config.AiMybatisSession;
 import io.github.yoyocw.aichatkit.ai.adapter.jdbc.config.AiJdbcResources;
 import io.github.yoyocw.aichatkit.ai.adapter.jdbc.config.AiJdbcResourceProperties;
 import io.github.yoyocw.aichatkit.ai.adapter.jdbc.config.AiJdbcResourceMode;
@@ -97,10 +98,16 @@ public class AiJdbcStorageAutoConfiguration {
         return beans.getBean(name, type);
     }
 
+    /** 内部会话工厂不成为宿主全局 MyBatis 候选，也不接管宿主的插件和 Mapper。 */
+    @Bean
+    public AiMybatisSession aiMybatisSession(AiJdbcResources resources) {
+        return new AiMybatisSession(resources.source());
+    }
+
     /** 私有模式仅接受自身生命周期事务；复用和显式引用允许真正同源宿主事务，均拒绝异库外层事务。 */
     @Bean
-    public AiTransactionExecutor aiJdbcTransactionExecutor(AiJdbcResources resources, AiJdbcResourceProperties properties) {
-        return new AiTransactionExecutor(resources.manager(), properties.getMode() == AiJdbcResourceMode.ISOLATED
+    public AiTransactionExecutor aiJdbcTransactionExecutor(AiJdbcResources resources, AiJdbcResourceProperties properties, AiMybatisSession sessions) {
+        return sessions.executor(resources.manager(), properties.getMode() == AiJdbcResourceMode.ISOLATED
                 ? AiTransactionMode.ISOLATED : AiTransactionMode.REUSE_HOST);
     }
 
@@ -117,9 +124,9 @@ public class AiJdbcStorageAutoConfiguration {
 
     /** 所有存储固定绑定 AI 选定资源，不再按宿主全局事务候选选取。 */
     @Bean
-    public AiJdbcAccess aiJdbcAccess(AiJdbcResources resources, AiTransactionExecutor executor, Environment environment) {
+    public AiJdbcAccess aiJdbcAccess(AiJdbcResources resources, AiTransactionExecutor executor, Environment environment, AiMybatisSession sessions) {
         if (resources.manager() != executor.manager()) { throw new IllegalStateException("AI JDBC 事务执行器与资源管理器不一致"); }
-        return new AiJdbcAccess(resources.source(), executor, environment.getProperty("ai-chat-kit.ai.starter.namespace"));
+        return new AiJdbcAccess(resources.source(), executor, environment.getProperty("ai-chat-kit.ai.starter.namespace"), sessions);
     }
 
     /** @return 复用既有记忆算法的 AI 数据访问对象 */

@@ -3,7 +3,8 @@ package io.github.yoyocw.aichatkit.ai.adapter.jdbc.dal;
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiInvocationContext;
 import io.github.yoyocw.aichatkit.ai.engine.transaction.AiTransactionExecutor;
 import io.github.yoyocw.aichatkit.ai.engine.transaction.AiTransactionMode;
-import org.springframework.jdbc.core.JdbcTemplate;
+import io.github.yoyocw.aichatkit.ai.adapter.jdbc.config.AiMybatisSession;
+import io.github.yoyocw.aichatkit.ai.adapter.jdbc.mapper.*;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -11,40 +12,47 @@ import javax.sql.DataSource;
 
 /** 固定数据源、事务管理器及部署作用域，拒绝在错误数据源事务内写消息。 */
 public final class AiJdbcAccess {
-    /** 所有 SQL 必须显式绑定这三个隔离条件。 */
-    public static final String SCOPE = "namespace = ? AND tenant_id = ? AND actor_id = ? AND deleted = false";
-    /** AI 实际选择的数据源。 */
-    private final DataSource dataSource;
     /** 部署固定命名空间。 */
     private final String namespace;
-    /** 复用 Spring JDBC 参数绑定与异常转换。 */
-    private final JdbcTemplate jdbc;
+    /** AI 私有 MyBatis-Plus 会话与 Mapper。 */
+    private final AiMybatisSession sessions;
     /** 与所选数据源对应的真实数据库事务。 */
     private final AiTransactionExecutor executor;
 
     /** @throws IllegalStateException 事务管理器与数据源不对应或部署未声明命名空间 */
     public AiJdbcAccess(DataSource dataSource, PlatformTransactionManager manager, String namespace) {
-        this(dataSource, new AiTransactionExecutor(manager, AiTransactionMode.REUSE_HOST), namespace);
+        this(dataSource, manager, namespace, new AiMybatisSession(dataSource));
+    }
+
+    private AiJdbcAccess(DataSource dataSource, PlatformTransactionManager manager, String namespace, AiMybatisSession sessions) {
+        this(dataSource, sessions.executor(manager, AiTransactionMode.REUSE_HOST), namespace, sessions);
     }
 
     /** @param dataSource AI 选定源 @param executor 同源执行器 @param namespace 固定命名空间；不依赖宿主默认管理器 */
     public AiJdbcAccess(DataSource dataSource, AiTransactionExecutor executor, String namespace) {
-        if (dataSource == null || executor == null || !(executor.manager() instanceof DataSourceTransactionManager)
+        this(dataSource, executor, namespace, new AiMybatisSession(dataSource));
+    }
+
+    public AiJdbcAccess(DataSource dataSource, AiTransactionExecutor executor, String namespace, AiMybatisSession sessions) {
+        if (dataSource == null || executor == null || sessions == null || !sessions.usesSource(dataSource) || !(executor.manager() instanceof DataSourceTransactionManager)
                 || ((DataSourceTransactionManager) executor.manager()).getDataSource() != dataSource
                 || executor.resourceFactory() != dataSource
                 || namespace == null || namespace.trim().isEmpty() || namespace.length() > 128) {
             throw new IllegalStateException("AI PostgreSQL 适配需要同一数据源的 JDBC 事务管理器及有效命名空间");
         }
-        this.dataSource = dataSource; this.namespace = namespace;
-        this.jdbc = new JdbcTemplate(dataSource); this.executor = executor;
+        this.namespace = namespace;
+        this.sessions = sessions; this.executor = executor;
     }
 
     /** @return 校验部署归属后的参数绑定作用域 */
     public AiJdbcScope scope(AiInvocationContext context) { return new AiJdbcScope(context, namespace); }
     /** @return 启动时冻结的部署命名空间，公开分享查询不能由访客参数覆盖 */
     public String namespace() { return namespace; }
-    /** @return 固定数据源 JDBC 操作 */
-    public JdbcTemplate jdbc() { return jdbc; }
+    public AiConversationMapper conversations() { return sessions.mapper(AiConversationMapper.class); }
+    public AiMessageMapper messages() { return sessions.mapper(AiMessageMapper.class); }
+    public AiMemberMapper members() { return sessions.mapper(AiMemberMapper.class); }
+    public AiOriginMapper origins() { return sessions.mapper(AiOriginMapper.class); }
+    public AiExecutionMapper executions() { return sessions.mapper(AiExecutionMapper.class); }
     /** @return 同源显式事务执行器，外部事务处理和提交回调归属由它统一检查 */
     public AiTransactionExecutor executor() { return executor; }
     /**

@@ -9,8 +9,7 @@ import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiInvocationContex
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-import static io.github.yoyocw.aichatkit.ai.adapter.jdbc.dal.AiJdbcAccess.SCOPE;
-import static io.github.yoyocw.aichatkit.ai.adapter.jdbc.dal.AiJdbcChatRepository.parameters;
+import io.github.yoyocw.aichatkit.ai.adapter.jdbc.entity.AiExecutionEntity;
 
 /** PostgreSQL 请求级执行审计；所有终态更新仅影响当前身份的执行中记录。 */
 public final class AiJdbcExecutionAuditAdapter implements AiExecutionAuditPort {
@@ -26,34 +25,39 @@ public final class AiJdbcExecutionAuditAdapter implements AiExecutionAuditPort {
     @Override
     public void start(AiInvocationContext context, AiChatMode mode, Long conversationId, Long messageId, String traceCode, String appId) {
         access.requireTransaction();
-        access.jdbc().update("INSERT INTO ai_runtime_execution(namespace,tenant_id,actor_id,mode,conversation_id,message_id,trace_code,app_id,status) VALUES(?,?,?,?,?,?,?,?,0)",
-                access.scope(context).args(mode(mode), conversationId, messageId, traceCode, appId));
+        AiExecutionEntity row = access.scope(context).initialize(new AiExecutionEntity(), mode(mode));
+        row.setConversationId(conversationId); row.setMessageId(messageId); row.setTraceCode(traceCode);
+        row.setAppId(appId); row.setStatus(0);
+        if (access.executions().insert(row) != 1) { throw new IllegalStateException("AI 执行审计写入失败"); }
     }
 
     /** 保留未知指标的 null 值，仅收口执行中的同轮审计。 */
     @Override
     public void complete(AiInvocationContext context, AiChatMode mode, Long messageId, AiExecutionMetrics metrics) {
-        access.executor().runRequired(() -> access.jdbc().update("UPDATE ai_runtime_execution SET status=1,request_id=?,model_names=?,input_tokens=?,output_tokens=?,tool_call_count=?,first_token_ms=?,total_duration_ms=?,updated_at=CURRENT_TIMESTAMP WHERE "
-                + SCOPE + " AND mode=? AND message_id=? AND status=0", parameters(new Object[]{metrics.getRequestId(), metrics.getModelNames(),
-                metrics.getInputTokens(), metrics.getOutputTokens(), metrics.getToolCallCount(), metrics.getFirstTokenMs(), metrics.getTotalDurationMs()},
-                access.scope(context).args(mode(mode), messageId))));
+        access.executor().runRequired(() -> access.executions().update(null,
+                access.scope(context).<AiExecutionEntity>update(mode(mode)).eq("message_id", messageId).eq("status", 0)
+                .set("status", 1).set("request_id", metrics.getRequestId()).set("model_names", metrics.getModelNames())
+                .set("input_tokens", metrics.getInputTokens()).set("output_tokens", metrics.getOutputTokens())
+                .set("tool_call_count", metrics.getToolCallCount()).set("first_token_ms", metrics.getFirstTokenMs())
+                .set("total_duration_ms", metrics.getTotalDurationMs()).setSql("updated_at=CURRENT_TIMESTAMP")));
     }
 
     /** 失败耗时与固定原因由引擎提供，不保存异常对象或模型原始响应。 */
     @Override
     public void fail(AiInvocationContext context, AiChatMode mode, Long messageId, long duration, String errorCode) {
-        access.executor().runRequired(() -> access.jdbc().update("UPDATE ai_runtime_execution SET status=3,total_duration_ms=?,error_code=?,updated_at=CURRENT_TIMESTAMP WHERE "
-                + SCOPE + " AND mode=? AND message_id=? AND status=0",
-                parameters(new Object[]{Math.max(0L, duration), errorCode}, access.scope(context).args(mode(mode), messageId))));
+        access.executor().runRequired(() -> access.executions().update(null,
+                access.scope(context).<AiExecutionEntity>update(mode(mode)).eq("message_id", messageId).eq("status", 0)
+                .set("status", 3).set("total_duration_ms", Math.max(0L, duration)).set("error_code", errorCode)
+                .setSql("updated_at=CURRENT_TIMESTAMP")));
     }
 
     /** 停止耗时由数据库真实创建时间计算，沿用发送事务的数据源。 */
     @Override
     public void stop(AiInvocationContext context, AiChatMode mode, Long messageId, String errorCode) {
         access.requireTransaction();
-        access.jdbc().update("UPDATE ai_runtime_execution SET status=2,error_code=?,total_duration_ms=GREATEST(0,EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP-created_at))*1000),updated_at=CURRENT_TIMESTAMP WHERE "
-                + SCOPE + " AND mode=? AND message_id=? AND status=0",
-                parameters(new Object[]{errorCode}, access.scope(context).args(mode(mode), messageId)));
+        access.executions().update(null, access.scope(context).<AiExecutionEntity>update(mode(mode))
+                .eq("message_id", messageId).eq("status", 0).set("status", 2).set("error_code", errorCode)
+                .setSql("total_duration_ms=GREATEST(0,EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP-created_at))*1000),updated_at=CURRENT_TIMESTAMP"));
     }
 
     /**
@@ -62,16 +66,18 @@ public final class AiJdbcExecutionAuditAdapter implements AiExecutionAuditPort {
      */
     @Override
     public void failStale(AiInvocationContext context, AiChatMode mode, Long conversationId, LocalDateTime cutoff, String errorCode) {
-        access.executor().runRequired(() -> access.jdbc().update("UPDATE ai_runtime_execution SET status=3,error_code=?,total_duration_ms=GREATEST(0,EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP-created_at))*1000),updated_at=CURRENT_TIMESTAMP WHERE "
-                + SCOPE + " AND mode=? AND conversation_id=? AND status=0 AND created_at<?",
-                parameters(new Object[]{errorCode}, access.scope(context).args(mode(mode), conversationId, Timestamp.valueOf(cutoff)))));
+        access.executor().runRequired(() -> access.executions().update(null,
+                access.scope(context).<AiExecutionEntity>update(mode(mode)).eq("conversation_id", conversationId)
+                .eq("status", 0).lt("created_at", Timestamp.valueOf(cutoff)).set("status", 3).set("error_code", errorCode)
+                .setSql("total_duration_ms=GREATEST(0,EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP-created_at))*1000),updated_at=CURRENT_TIMESTAMP")));
     }
 
     /** 只在当前执行中记录一次会话重建尝试。 */
     @Override
     public void incrementRetry(AiInvocationContext context, AiChatMode mode, Long messageId) {
-        access.executor().runRequired(() -> access.jdbc().update("UPDATE ai_runtime_execution SET retry_count=retry_count+1,updated_at=CURRENT_TIMESTAMP WHERE "
-                + SCOPE + " AND mode=? AND message_id=? AND status=0", access.scope(context).args(mode(mode), messageId)));
+        access.executor().runRequired(() -> access.executions().update(null,
+                access.scope(context).<AiExecutionEntity>update(mode(mode)).eq("message_id", messageId).eq("status", 0)
+                .setSql("retry_count=retry_count+1,updated_at=CURRENT_TIMESTAMP")));
     }
 
     /** @return 固定模式字符串，拒绝缺失模式导致查询扩大 */

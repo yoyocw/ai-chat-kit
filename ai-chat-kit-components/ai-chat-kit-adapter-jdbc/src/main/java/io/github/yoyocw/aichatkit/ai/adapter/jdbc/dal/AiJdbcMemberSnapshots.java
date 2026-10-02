@@ -1,8 +1,7 @@
 package io.github.yoyocw.aichatkit.ai.adapter.jdbc.dal;
 
 import io.github.yoyocw.aichatkit.module.ai.contract.context.AiGroupMemberSnapshot;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import io.github.yoyocw.aichatkit.ai.adapter.jdbc.entity.AiMemberEntity;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -16,11 +15,23 @@ final class AiJdbcMemberSnapshots {
     private AiJdbcMemberSnapshots() { }
 
     /** @return 已完整保存的成员，旧行缺字段时失败 */
-    static AiGroupMemberSnapshot read(ResultSet row) throws SQLException {
-        AiGroupMemberSnapshot member = new AiGroupMemberSnapshot(row.getString("agent_code"),
-                row.getString("agent_name"), row.getString("agent_role"));
+    static AiGroupMemberSnapshot read(AiMemberEntity row) {
+        AiGroupMemberSnapshot member = new AiGroupMemberSnapshot(row.getAgentCode(),
+                row.getAgentName(), row.getAgentRole());
         validate(member);
         return member;
+    }
+
+    /** 创建与成员变更共用真实目录快照插入路径。 */
+    static void insert(AiJdbcAccess access, AiJdbcScope scope, Long conversationId, List<AiGroupMemberSnapshot> members) {
+        access.requireTransaction();
+        for (int i = 0; i < members.size(); i++) {
+            AiGroupMemberSnapshot member = members.get(i);
+            AiMemberEntity row = scope.initialize(new AiMemberEntity(), "group");
+            row.setConversationId(conversationId); row.setAgentCode(member.getCode());
+            row.setAgentName(member.getName()); row.setAgentRole(member.getRole()); row.setSortOrder(i);
+            if (access.members().insert(row) != 1) { throw new IllegalStateException("AI 群聊成员保存失败"); }
+        }
     }
 
     /** 校验当前真实成员集合并提取有序编码，创建/更新/历史读取使用一致边界。 */

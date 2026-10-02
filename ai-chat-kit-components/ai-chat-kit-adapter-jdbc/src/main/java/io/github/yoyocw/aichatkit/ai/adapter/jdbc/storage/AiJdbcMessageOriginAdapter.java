@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static io.github.yoyocw.aichatkit.ai.adapter.jdbc.dal.AiJdbcAccess.SCOPE;
+import io.github.yoyocw.aichatkit.ai.adapter.jdbc.entity.AiOriginEntity;
 
 /** 同事务记录不可变来源，复核时始终匹配完整来源维度，不以用户相同替代调用方归属。 */
 public final class AiJdbcMessageOriginAdapter implements AiMessageOriginPort {
@@ -35,12 +35,7 @@ public final class AiJdbcMessageOriginAdapter implements AiMessageOriginPort {
         if (appId == null || appId.trim().isEmpty()) { throw new IllegalArgumentException("实际应用缺失"); }
         String modeCode = AiJdbcExecutionAuditAdapter.mode(mode);
         // INSERT SELECT 同时验证助手占位归属和生成态；唯一冲突交外层事务回滚。
-        int inserted = access.jdbc().update("INSERT INTO ai_runtime_origin(namespace,tenant_id,actor_id,mode,message_id,client_record_id,client_id,business_system,environment,app_id)"
-                + " SELECT namespace,tenant_id,actor_id,mode,id,?,?,?,?,? FROM ai_runtime_message WHERE "
-                + SCOPE + " AND mode=? AND id=? AND role='assistant' AND status=0",
-                io.github.yoyocw.aichatkit.ai.adapter.jdbc.dal.AiJdbcChatRepository.parameters(new Object[]{origin.getClientRecordIdentifier(),
-                        origin.getClientId(), origin.getBusinessSystem(), origin.getEnvironment(), appId},
-                        access.scope(context).args(modeCode, messageId)));
+        int inserted = access.origins().record(access.scope(context), modeCode, messageId, origin, appId);
         if (inserted != 1) { throw new IllegalStateException("委托来源助手占位归属无效"); }
     }
 
@@ -49,12 +44,11 @@ public final class AiJdbcMessageOriginAdapter implements AiMessageOriginPort {
     public String verify(AiInvocationContext context, AiCallerOrigin caller, AiChatMode mode, Long messageId, Set<String> allowedAppIds) {
         access.requireTransaction(); validate(context, caller, messageId);
         if (allowedAppIds == null || allowedAppIds.isEmpty()) { throw new IllegalStateException("委托应用范围为空"); }
-        List<String> apps = access.jdbc().query("SELECT app_id FROM ai_runtime_origin WHERE " + SCOPE
-                + " AND mode=? AND message_id=? AND client_record_id=? AND client_id=? AND business_system=? AND environment=?",
-                (rs, row) -> rs.getString(1), access.scope(context).args(AiJdbcExecutionAuditAdapter.mode(mode), messageId,
-                        caller.getClientRecordIdentifier(), caller.getClientId(), caller.getBusinessSystem(), caller.getEnvironment()));
-        if (apps.size() != 1 || !allowedAppIds.contains(apps.get(0))) { throw new IllegalStateException("委托消息来源缺失或不匹配"); }
-        return apps.get(0);
+        List<AiOriginEntity> origins = access.origins().selectList(access.scope(context).<AiOriginEntity>query(AiJdbcExecutionAuditAdapter.mode(mode))
+                .select("app_id").eq("message_id", messageId).eq("client_record_id", caller.getClientRecordIdentifier())
+                .eq("client_id", caller.getClientId()).eq("business_system", caller.getBusinessSystem()).eq("environment", caller.getEnvironment()));
+        if (origins.size() != 1 || !allowedAppIds.contains(origins.get(0).getAppId())) { throw new IllegalStateException("委托消息来源缺失或不匹配"); }
+        return origins.get(0).getAppId();
     }
 
     /** 标识完全匹配，禁止不透明身份隐式转换为林业数字编号。 */

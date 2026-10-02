@@ -1,0 +1,94 @@
+[
+  {
+    "Coordinate": "com.baomidou:mybatis-plus-annotation:3.5.15",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.baomidou:mybatis-plus-annotation:3.5.15"
+      }
+    ],
+    "JarSha256": "0F75920F232F72F1AA75D1196E7CBD655041BE1FD242669027B10B79504AC564",
+    "LicenseEntries": [
+      "META-INF/LICENSE"
+    ]
+  },
+  {
+    "Coordinate": "com.baomidou:mybatis-plus-core:3.5.15",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.baomidou:mybatis-plus-core:3.5.15"
+      }
+    ],
+    "JarSha256": "E3C18157B856C0FF7D464B9A2614865C7C81B1434C2E26756614BB998203E092",
+    "LicenseEntries": [
+      "META-INF/LICENSE"
+    ]
+  },
+  {
+    "Coordinate": "com.baomidou:mybatis-plus-extension:3.5.15",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.baomidou:mybatis-plus-extension:3.5.15"
+      }
+    ],
+    "JarSha256": "F5A781ED0F991C784D67DD30BD81933074A4D58BDBD4B242E77F95D06F679E37",
+    "LicenseEntries": [
+      "META-INF/LICENSE"
+    ]
+  },
+  {
+    "Coordinate": "com.baomidou:mybatis-plus-spring:3.5.15",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache License, Version 2.0",
+        "Url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "com.baomidou:mybatis-plus-spring:3.5.15"
+      }
+    ],
+    "JarSha256": "DDE0BF1ABA90403BA397DA0FA94C35817C67294177FB19201299563CEF190D06",
+    "LicenseEntries": [
+      "META-INF/LICENSE"
+    ]
+  },
+  {
+    "Coordinate": "org.mybatis:mybatis-spring:2.1.2",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.mybatis:mybatis-parent:36"
+      }
+    ],
+    "JarSha256": "81EA52CD5523F9D986CDD4D6EA9D717356AE9501A2ECCF256CE234A988861CEA",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  },
+  {
+    "Coordinate": "org.mybatis:mybatis:3.5.19",
+    "Scope": "compile",
+    "Licenses": [
+      {
+        "Name": "The Apache Software License, Version 2.0",
+        "Url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "DeclaredIn": "org.mybatis:mybatis-parent:48"
+      }
+    ],
+    "JarSha256": "93EEA616AE355751BD5FBABB57F0732713FBE79F3196F33C51A0AEEB4255862A",
+    "LicenseEntries": [
+      "META-INF/LICENSE",
+      "META-INF/NOTICE"
+    ]
+  }
+]
