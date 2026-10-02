@@ -8,12 +8,14 @@ import io.github.yoyocw.aichatkit.ai.starter.host.AiHostConversationShareService
 import io.github.yoyocw.aichatkit.ai.starter.host.AiHostSingleChatService;
 import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianClient;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /** Structural enabled acceptance against the isolated local PostgreSQL candidate environment. */
+@EnabledIfEnvironmentVariable(named = "AI_TEST_POSTGRES_URL", matches = ".+")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
         "ai-chat-kit.ai.engine.enabled=true",
         "ai-chat-kit.ai.web.enabled=true",

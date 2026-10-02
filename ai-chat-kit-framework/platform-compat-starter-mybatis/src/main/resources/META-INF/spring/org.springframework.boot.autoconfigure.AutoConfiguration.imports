@@ -1,3 +1,0 @@
-io.github.yoyocw.aichatkit.compat.framework.datasource.config.AiChatKitDataSourceAutoConfiguration
-io.github.yoyocw.aichatkit.compat.framework.mybatis.config.AiChatKitMybatisAutoConfiguration
-io.github.yoyocw.aichatkit.compat.framework.translate.config.AiChatKitTranslateAutoConfiguration

@@ -1,2 +1,0 @@
-org.springframework.boot.env.EnvironmentPostProcessor=\
-  io.github.yoyocw.aichatkit.compat.framework.mybatis.config.IdTypeEnvironmentPostProcessor

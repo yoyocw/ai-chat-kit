@@ -13,7 +13,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -21,6 +20,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ResourceLoader;
 
 /**
  * 仅 ai-chat-kit.ai.platform-host.mode=ordinary-bearer 时启用；缺省仍是原平台链。
@@ -32,11 +32,6 @@ import org.springframework.core.env.Environment;
 @ConditionalOnBean(type = "io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiRuntimeActivation")
 @ConditionalOnExpression("'${ai-chat-kit.ai.engine.enabled:false}' == 'true' && "
         + "'${ai-chat-kit.ai.platform-host.mode:}' == 'ordinary-bearer'")
-@ConditionalOnClass(name = {"io.github.yoyocw.aichatkit.compat.framework.security.core.oauth2.OAuth2SessionInspectionClient",
-        "io.github.yoyocw.aichatkit.compat.framework.security.core.LoginUser",
-        "io.github.yoyocw.aichatkit.compat.framework.security.core.util.SecurityFrameworkUtils",
-        "io.github.yoyocw.aichatkit.compat.framework.tenant.core.context.TenantContextHolder",
-        "javax.servlet.http.HttpServletRequest"})
 @EnableConfigurationProperties(PlatformHostInspectionProperties.class)
 @AutoConfigureAfter(PlatformInspectionAutoConfiguration.class)
 @AutoConfigureBefore(name = {"io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiPlainChatAutoConfiguration",
@@ -45,13 +40,18 @@ import org.springframework.core.env.Environment;
         "io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiGroupExecutionAutoConfiguration",
         "io.github.yoyocw.aichatkit.ai.starter.autoconfigure.AiStarterAutoConfiguration"})
 public class PlatformHostConfiguration {
+    @Bean
+    public PlatformNativeLoginSource platformNativeLoginSource(ResourceLoader resources, Environment environment) {
+        return PlatformNativeLoginSource.fromEnvironment(resources, environment);
+    }
+
     /** 每个绑定创建一个消费者租户等于主体租户的受限客户端，由 Spring 关闭资源。 */
     @Bean(destroyMethod = "close")
     @ConditionalOnMissingBean(PlatformTenantInspectionRouter.class)
     @Conditional(PlatformMultiTenantInspectionCondition.class)
     public PlatformTenantInspectionRouter platformTenantInspectionRouter(
-            PlatformHostInspectionProperties properties) {
-        return new PlatformTenantInspectionRouter(properties);
+            PlatformHostInspectionProperties properties, PlatformNativeLoginSource nativeLogin) {
+        return new PlatformTenantInspectionRouter(properties, nativeLogin.adminUserType());
     }
 
     /** @return 共享真实校验的身份、会话和权限实现；错误配置必须阻止启用 */
@@ -59,21 +59,20 @@ public class PlatformHostConfiguration {
     public PlatformHostAuthenticationAdapter platformHostAuthenticationAdapter(
             ObjectProvider<PlatformTenantInspectionRouter> routers,
             ObjectProvider<AiSessionInspectionClient> inspections,
-            AiSessionInspectionProperties properties, Environment environment) {
+            AiSessionInspectionProperties properties, PlatformNativeLoginSource nativeLogin,
+            Environment environment) {
         if (environment.getProperty("ai-chat-kit.ai.mcp-jwt-v1.verification-enabled", Boolean.class, false)) {
             throw new IllegalStateException("平台普通 Bearer 模式不能作为 MCP 资源验签侧的会话或权限适配");
         }
-        if (!"platform".equals(environment.getProperty("ai-chat-kit.ai.starter.namespace", "platform"))) {
-            throw new IllegalStateException("平台普通 Bearer 模式需要 platform 命名空间");
-        }
+        String namespace = environment.getProperty("ai-chat-kit.ai.starter.namespace", "platform");
         PlatformTenantInspectionRouter router = routers.getIfAvailable();
-        if (router != null) { return new PlatformHostAuthenticationAdapter(router); }
+        if (router != null) { return new PlatformHostAuthenticationAdapter(router, nativeLogin, namespace); }
         AiSessionInspectionClient inspection = inspections.getIfAvailable();
         if (inspection == null || !properties.isEnabled() || properties.getSubjectTenantId() == null
                 || properties.getSubjectTenantId() < 0) {
             throw new IllegalStateException("平台普通 Bearer 模式需要多租户绑定或已启用的固定租户复核");
         }
-        return new PlatformHostAuthenticationAdapter(inspection, properties);
+        return new PlatformHostAuthenticationAdapter(inspection, properties, nativeLogin, namespace);
     }
 
     /** @return 与身份共用正面凭据核验的来源适配，不与旧来源混用 */

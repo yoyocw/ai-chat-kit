@@ -1,7 +1,7 @@
 package io.github.yoyocw.aichatkit.module.ai.adapter.platform.host;
 
-import io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionReqDTO;
-import io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionRespDTO;
+import io.github.yoyocw.aichatkit.module.ai.adapter.platform.inspection.PlatformInspectionRequest;
+import io.github.yoyocw.aichatkit.module.ai.adapter.platform.inspection.PlatformInspectionResult;
 import io.github.yoyocw.aichatkit.module.ai.adapter.platform.AiSessionInspectionClient;
 import io.github.yoyocw.aichatkit.module.ai.config.AiSessionInspectionProperties;
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityError;
@@ -48,11 +48,11 @@ class PlatformTenantInspectionRouterTest {
                     return clients.get(item.getSubjectTenantId());
                 })) {
             assertThat(router.inspect(request(11L)).getUserId()).isEqualTo(101L);
-            verify(tenant11).inspect(any(OAuth2SessionInspectionReqDTO.class));
-            verify(tenant22, never()).inspect(any(OAuth2SessionInspectionReqDTO.class));
+            verify(tenant11).inspect(any(PlatformInspectionRequest.class));
+            verify(tenant22, never()).inspect(any(PlatformInspectionRequest.class));
 
             assertThat(router.inspect(request(22L)).getUserId()).isEqualTo(202L);
-            verify(tenant22).inspect(any(OAuth2SessionInspectionReqDTO.class));
+            verify(tenant22).inspect(any(PlatformInspectionRequest.class));
         }
 
         assertThat(created).hasSize(2).allSatisfy(item -> {
@@ -112,8 +112,8 @@ class PlatformTenantInspectionRouterTest {
         return binding;
     }
 
-    private OAuth2SessionInspectionReqDTO request(Long tenantId) {
-        OAuth2SessionInspectionReqDTO request = new OAuth2SessionInspectionReqDTO();
+    private PlatformInspectionRequest request(Long tenantId) {
+        PlatformInspectionRequest request = new PlatformInspectionRequest();
         request.setSubjectType("USER");
         request.setAccessToken("user-token");
         request.setExpectedTenantId(tenantId);
@@ -121,8 +121,8 @@ class PlatformTenantInspectionRouterTest {
         return request;
     }
 
-    private OAuth2SessionInspectionRespDTO identity(Long tenantId, Long userId) {
-        OAuth2SessionInspectionRespDTO identity = new OAuth2SessionInspectionRespDTO();
+    private PlatformInspectionResult identity(Long tenantId, Long userId) {
+        PlatformInspectionResult identity = new PlatformInspectionResult();
         identity.setTenantId(tenantId);
         identity.setUserId(userId);
         return identity;

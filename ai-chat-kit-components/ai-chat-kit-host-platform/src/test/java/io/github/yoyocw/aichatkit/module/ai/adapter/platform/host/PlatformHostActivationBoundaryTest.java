@@ -1,5 +1,6 @@
 package io.github.yoyocw.aichatkit.module.ai.adapter.platform.host;
 
+import io.github.yoyocw.aichatkit.module.ai.adapter.platform.AiSessionInspectionClient;
 import io.github.yoyocw.aichatkit.ai.engine.autoconfigure.AiRuntimeActivation;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -13,6 +14,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /** Spring assembly boundaries for optional provided Platform dependencies and tenant bindings. */
 class PlatformHostActivationBoundaryTest {
 
+    private static final String NATIVE_ROOT = "ai-chat-kit.ai.platform-host.native-package-root="
+            + PlatformLocalBeanResolverTest.ROOT;
+
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(PlatformHostRuntimeValidationConfiguration.class,
                     PlatformInspectionAutoConfiguration.class,
@@ -20,13 +24,29 @@ class PlatformHostActivationBoundaryTest {
 
     @Test
     void disabledEngineWithoutActivationDoesNotResolveProvidedPlatformRuntimeClasses() {
-        runner.withClassLoader(new FilteredClassLoader("io.github.yoyocw.aichatkit.compat.framework.security",
-                        "io.github.yoyocw.aichatkit.compat.framework.tenant"))
+        runner.withClassLoader(new FilteredClassLoader(PlatformLocalBeanResolverTest.ROOT))
                 .withPropertyValues("ai-chat-kit.ai.engine.enabled=false",
                         "ai-chat-kit.ai.platform-host.mode=ordinary-bearer")
                 .run(context -> assertThat(context).hasNotFailed()
                         .doesNotHaveBean("platformTenantInspectionRouter")
                         .doesNotHaveBean("platformHostAuthenticationAdapter"));
+    }
+
+    @Test
+    void inspectionSwitchCannotResolveNativeClassesWithoutMarkerOrEnabledEngine() {
+        runner.withClassLoader(new FilteredClassLoader(PlatformLocalBeanResolverTest.ROOT))
+                .withPropertyValues("ai-chat-kit.ai.engine.enabled=true",
+                        "ai-chat-kit.ai.platform-host.mode=ordinary-bearer",
+                        "ai-chat-kit.ai.session-inspection.enabled=true", NATIVE_ROOT)
+                .run(context -> assertThat(context).hasNotFailed()
+                        .doesNotHaveBean(AiSessionInspectionClient.class));
+        runner.withClassLoader(new FilteredClassLoader(PlatformLocalBeanResolverTest.ROOT))
+                .withUserConfiguration(ActivatedRuntime.class)
+                .withPropertyValues("ai-chat-kit.ai.engine.enabled=false",
+                        "ai-chat-kit.ai.platform-host.mode=ordinary-bearer",
+                        "ai-chat-kit.ai.session-inspection.enabled=true", NATIVE_ROOT)
+                .run(context -> assertThat(context).hasNotFailed()
+                        .doesNotHaveBean(AiSessionInspectionClient.class));
     }
 
     @Test
@@ -36,6 +56,7 @@ class PlatformHostActivationBoundaryTest {
                         "ai-chat-kit.ai.engine.enabled=true",
                         "ai-chat-kit.ai.starter.namespace=platform",
                         "ai-chat-kit.ai.platform-host.mode=ordinary-bearer",
+                        NATIVE_ROOT,
                         "ai-chat-kit.ai.platform-host.inspections[0].base-url=https://tenant.example",
                         "ai-chat-kit.ai.platform-host.inspections[0].consumer-access-token=multi-token",
                         "ai-chat-kit.ai.session-inspection.enabled=true",
@@ -48,13 +69,29 @@ class PlatformHostActivationBoundaryTest {
 
     @Test
     void explicitlyEnabledHostFailsWhenProvidedPlatformRuntimeClassesAreMissing() {
-        runner.withClassLoader(new FilteredClassLoader("io.github.yoyocw.aichatkit.compat.framework.security",
-                        "io.github.yoyocw.aichatkit.compat.framework.tenant"))
+        runner.withClassLoader(new FilteredClassLoader(PlatformLocalBeanResolverTest.ROOT))
                 .withUserConfiguration(ActivatedRuntime.class)
                 .withPropertyValues("ai-chat-kit.ai.engine.enabled=true",
-                        "ai-chat-kit.ai.platform-host.mode=ordinary-bearer")
+                        "ai-chat-kit.ai.platform-host.mode=ordinary-bearer", NATIVE_ROOT)
                 .run(context -> assertThat(context).hasFailed()
-                        .getFailure().hasStackTraceContaining("启用平台宿主能力缺少运行时类型"));
+                        .getFailure().hasStackTraceContaining("原生本地认证服务未就绪"));
+    }
+
+    @Test
+    void fixedTenantOrdinaryModeAssemblesWithNativeRootAndOwnedTransport() {
+        runner.withUserConfiguration(ActivatedRuntime.class)
+                .withPropertyValues("ai-chat-kit.ai.engine.enabled=true",
+                        "ai-chat-kit.ai.starter.namespace=platform",
+                        "ai-chat-kit.ai.platform-host.mode=ordinary-bearer", NATIVE_ROOT,
+                        "ai-chat-kit.ai.session-inspection.enabled=true",
+                        "ai-chat-kit.ai.session-inspection.base-url=https://identity.example",
+                        "ai-chat-kit.ai.session-inspection.consumer-access-token=deployment-token",
+                        "ai-chat-kit.ai.session-inspection.consumer-tenant-id=11",
+                        "ai-chat-kit.ai.session-inspection.subject-tenant-id=11")
+                .run(context -> assertThat(context).hasNotFailed()
+                        .hasSingleBean(PlatformNativeLoginSource.class)
+                        .hasSingleBean(AiSessionInspectionClient.class)
+                        .hasSingleBean(PlatformHostAuthenticationAdapter.class));
     }
 
     @Configuration(proxyBeanMethods = false)

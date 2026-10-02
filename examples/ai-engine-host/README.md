@@ -95,7 +95,7 @@ ai-chat-kit:
 
 平台宿主在已有安全、租户框架中加入同版本`starter`、所需中立适配器及`ai-chat-kit-host-platform`，启动类添加`@EnableAiChatKit`，再启用以下配置。组件使用原始 Bearer、已认证`LoginUser`和`TenantContextHolder`共同确定租户；请求头或参数不能选择消费者凭据。
 
-此适配要求宿主框架提供兼容的`OAuth2SessionInspectionClient`（含`inspect`和`close`方法）、`LoginUser`及`TenantContextHolder`等类型。本仓兼容测试不代表任意原 Platform 版本可直接接入；当前原工作区缺少该会话检查客户端，接入前须准备匹配的框架版本。
+此模式复用宿主原生登录与租户上下文，并由组件自带的受限 HTTPS 客户端查询认证服务。无需额外安装平台兼容框架或在宿主新增 inspection 客户端类；认证服务仍须提供相应受限查询接口。原生包根只从部署配置读取，启动时严格核验所需类型与方法，缺失即拒绝。
 
 ```yaml
 ai-chat-kit:
@@ -109,6 +109,7 @@ ai-chat-kit:
       path-prefix: /admin-api/ai-component
     platform-host:
       mode: ordinary-bearer
+      native-package-root: ${AI_NATIVE_PACKAGE_ROOT} # 原生登录/租户上下文；仅来自部署配置
       inspections:
         - tenant-id: ${AI_TENANT_ID}
           base-url: ${AI_AUTH_BASE_URL}
@@ -118,7 +119,9 @@ ai-chat-kit:
       signing-enabled: false
 ```
 
-每个租户必须配置独立的受限消费者，`consumerTenantId`和`subjectTenantId`均固定为该项`tenant-id`。增加租户就增加列表项；重复租户、空凭据、非法 HTTPS 源站或未知租户会拒绝启动或调用。旧`session-inspection`固定租户配置继续服务 legacy 链路，新列表不会改写其语义。无工具聊天只需`authorization-enabled`及真实应用权限策略；选择工具后仍必须启用签发并提供主体映射、密钥和资源侧信任配置。
+每个租户必须配置独立的受限消费者，`consumerTenantId`和`subjectTenantId`均固定为该项`tenant-id`。增加租户就增加列表项；重复租户、空凭据、非法 HTTPS 源站或未知租户会拒绝启动或调用。已有`session-inspection`固定租户配置仍可用于未配置多租户列表的接入。无工具聊天仍需`authorization-enabled`及真实应用权限策略；选择工具后必须启用签发并提供主体映射、密钥和资源侧信任配置。
+
+从旧兼容包升级到精简版时，ordinary-bearer 需要上述原生包根；也接受已有 `platform-host.in-process.native-package-root` 配置作为回退。组件不会猜测宿主包名或退回复制的兼容身份类。同进程模式继续使用原有嵌套配置。
 
 ## 存量数据与旧入口
 
@@ -141,7 +144,7 @@ ai-chat-kit:
         transaction-manager-bean: yourActualTransactionManagerBean
 ```
 
-上述Bean名称需替换为宿主实际名称，且不得与isolated凭据混用。首次复用时存在未知附属线程资源会被保守拒绝；复杂MyBatis/JPA/JTA宿主不能直接推定兼容，须明确验证资源归属。平台适配已显式验证其MyBatis同源资源，新项目不会自动继承该证明。
+上述Bean名称需替换为宿主实际名称，且不得与isolated凭据混用。首次复用时存在未知附属线程资源会被保守拒绝；复杂MyBatis/JPA/JTA宿主须明确验证资源归属，历史兼容工程的测试不自动证明本次接入通过。
 
 ## 验证与部署边界
 
@@ -153,4 +156,4 @@ mvn -P ai-engine-example -pl examples/ai-engine-host -am package -DskipTests
 
 `/host/health`仅代表宿主存活；`/host/engine`只列本地装配状态，不验证数据库、登录、模型或工具。默认监听127.0.0.1随机端口。关闭AI的启动已验证；完整启用及真实业务需实际宿主适配和环境，不以启动成功代替业务验收。
 
-本轮命名、宿主兼容与重建验收见 [中性命名交付说明](../../docs/componentization/platform-neutralization.md)。可选其他宿主的源码存在不等于已完成其真实业务验收。
+本轮结构调整与验证要求见 [项目精简计划](../../docs/componentization/slimming-plan.md)。旧服务端、旧表脚本和旧 SDK 样例已退出主工程；历史业务工程继续保留自己的读取路径，不自动迁移数据。其他宿主适配的源码存在不等于已完成真实业务验收。

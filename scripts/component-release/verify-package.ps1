@@ -3,7 +3,9 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Repository,
 
-    [string]$Version = "1.2.0-SNAPSHOT"
+    [string]$Version = "1.2.0-SNAPSHOT",
+
+    [switch]$IncludePlatformHost
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,7 +14,7 @@ if (-not (Test-Path -LiteralPath $repositoryPath -PathType Container)) {
     throw "Maven repository does not exist: $repositoryPath"
 }
 
-$artifacts = @(
+$neutralArtifacts = @(
     "ai-chat-kit-mcp-jwt",
     "ai-chat-kit-contract",
     "ai-chat-kit-engine",
@@ -22,6 +24,8 @@ $artifacts = @(
     "ai-chat-kit-adapter-mcp-jwt-v1",
     "ai-chat-kit-adapter-hosted-proxy"
 )
+$artifacts = @($neutralArtifacts)
+if ($IncludePlatformHost) { $artifacts += 'ai-chat-kit-host-platform' }
 
 $forbiddenArtifactIds = @(
     "spring-cloud-starter-alibaba-nacos-discovery",
@@ -77,13 +81,14 @@ $results = foreach ($artifactId in $artifacts) {
     foreach ($dependency in $publishedPom.SelectNodes("/*[local-name()='project']/*[local-name()='dependencies']/*[local-name()='dependency']")) {
         $dependencyGroup = $dependency.SelectSingleNode("./*[local-name()='groupId']").InnerText.Trim()
         $dependencyArtifact = $dependency.SelectSingleNode("./*[local-name()='artifactId']").InnerText.Trim()
-        if ($dependencyGroup -eq 'io.github.yoyocw' -and $dependencyArtifact -notin $artifacts) {
+        if ($dependencyGroup -eq 'io.github.yoyocw' -and $dependencyArtifact -notin $neutralArtifacts) {
             throw "$artifactId published POM references a non-neutral project artifact $dependencyArtifact"
         }
     }
     foreach ($artifactIdNode in $publishedPom.SelectNodes("//*[local-name()='artifactId']")) {
         $referencedArtifactId = $artifactIdNode.InnerText.Trim()
-        if ($referencedArtifactId -match '^(platform-compat-|ai-chat-kit-(legacy-|host-))' -or
+        if (($referencedArtifactId -match '^(platform-compat-|ai-chat-kit-(legacy-|host-))' -and
+                $referencedArtifactId -ne $artifactId) -or
             $forbiddenArtifactIds -contains $referencedArtifactId) {
             throw "$artifactId published POM leaks forbidden platform artifact $referencedArtifactId"
         }
@@ -113,4 +118,4 @@ $results = foreach ($artifactId in $artifacts) {
 }
 
 $results
-Write-Output "Verified $($results.Count) neutral component artifacts in $repositoryPath"
+Write-Output "Verified $($results.Count) selected component artifacts in $repositoryPath"

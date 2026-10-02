@@ -1,5 +1,0 @@
-io.github.yoyocw.aichatkit.module.ai.adapter.platform.hostedproxy.PlatformV2StopAutoConfiguration
-io.github.yoyocw.aichatkit.module.ai.adapter.platform.hostedproxy.PlatformStopOriginAutoConfiguration
-io.github.yoyocw.aichatkit.module.ai.adapter.platform.transaction.PlatformTransactionAutoConfiguration
-io.github.yoyocw.aichatkit.module.ai.adapter.platform.share.PlatformConversationShareConfiguration
-io.github.yoyocw.aichatkit.module.ai.adapter.platform.transaction.PlatformDataSourceOrderAutoConfiguration

@@ -10,12 +10,11 @@
     <packaging>pom</packaging>
     <modules>
         <module>ai-chat-kit-dependencies</module>
-        <module>ai-chat-kit-framework</module>
         <module>ai-chat-kit-components</module>
     </modules>
 
     <name>AI Chat Kit</name>
-    <description>Java 8 / Spring Boot 2.7 可嵌入 AI 组件与可选林业兼容适配</description>
+    <description>Java 8 / Spring Boot 2.7 可嵌入 AI 组件与可选宿主适配</description>
     <url>https://github.com/yoyocw/ai-chat-kit</url>
 
     <licenses>
@@ -48,7 +47,6 @@
         <!-- maven-surefire-plugin 暂时无法通过 bom 的依赖读取（兼容老版本 IDEA 2024 及以前版本） -->
         <lombok.version>1.18.42</lombok.version>
         <spring.boot.version>2.7.18</spring.boot.version>
-        <mapstruct.version>1.6.3</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -87,8 +85,7 @@
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${maven-surefire-plugin.version}</version>
                 </plugin>
-                <!-- maven-compiler-plugin 插件，解决 Lombok + MapStruct 组合 -->
-                <!-- https://stackoverflow.com/questions/33483697/re-run-spring-boot-configuration-annotation-processor-to-update-generated-metada -->
+                <!-- 中立组件使用 Spring 配置元数据和 Lombok 注解处理器。 -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -104,18 +101,6 @@
                                 <groupId>org.projectlombok</groupId>
                                 <artifactId>lombok</artifactId>
                                 <version>${lombok.version}</version>
-                            </path>
-                            <path>
-                                <!-- 确保 Lombok 生成的 getter/setter 方法能被 MapStruct 正确识别，
-                                     避免出现 No property named “xxx" exists 的编译错误 -->
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok-mapstruct-binding</artifactId>
-                                <version>0.2.0</version>
-                            </path>
-                            <path>
-                                <groupId>org.mapstruct</groupId>
-                                <artifactId>mapstruct-processor</artifactId>
-                                <version>${mapstruct.version}</version>
                             </path>
                         </annotationProcessorPaths>
                     </configuration>
@@ -167,42 +152,11 @@
         </plugins>
     </build>
 
-    <!-- 使用 huawei / aliyun 的 Maven 源，提升下载速度 -->
     <profiles>
-        <profile>
-            <id>platform-compat</id>
-            <modules>
-                <module>platform-compat-fac</module>
-            </modules>
-            <repositories>
-                <repository>
-                    <id>osgeo</id>
-                    <name>OSGeo Release Repository</name>
-                    <url>https://repo.osgeo.org/repository/release/</url>
-                </repository>
-            </repositories>
-        </profile>
         <profile>
             <id>ai-engine-example</id>
             <modules><module>examples/ai-engine-host</module></modules>
         </profile>
-        <profile>
-            <id>ai-client-example</id>
-            <modules><module>examples/ai-client-host</module></modules>
-        </profile>
     </profiles>
-
-    <repositories>
-        <repository>
-            <id>huaweicloud</id>
-            <name>huawei</name>
-            <url>https://mirrors.huaweicloud.com/repository/maven/</url>
-        </repository>
-        <repository>
-            <id>aliyunmaven</id>
-            <name>aliyun</name>
-            <url>https://maven.aliyun.com/repository/public</url>
-        </repository>
-    </repositories>
 
 </project>

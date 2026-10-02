@@ -1,11 +1,10 @@
 package io.github.yoyocw.aichatkit.module.ai.adapter.platform.host;
 
-import io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionReqDTO;
-import io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionRespDTO;
-import io.github.yoyocw.aichatkit.compat.framework.common.enums.UserTypeEnum;
-import io.github.yoyocw.aichatkit.compat.framework.security.core.LoginUser;
-import io.github.yoyocw.aichatkit.compat.framework.security.core.util.SecurityFrameworkUtils;
-import io.github.yoyocw.aichatkit.compat.framework.tenant.core.context.TenantContextHolder;
+import io.github.yoyocw.aichatkit.module.ai.adapter.platform.inspection.PlatformInspectionResult;
+import io.github.yoyocw.aichatkit.testnative.framework.common.enums.UserTypeEnum;
+import io.github.yoyocw.aichatkit.testnative.framework.security.core.LoginUser;
+import io.github.yoyocw.aichatkit.testnative.framework.security.core.util.SecurityFrameworkUtils;
+import io.github.yoyocw.aichatkit.testnative.framework.tenant.core.context.TenantContextHolder;
 import io.github.yoyocw.aichatkit.module.ai.adapter.platform.AiSessionInspectionClient;
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityError;
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityException;
@@ -13,7 +12,6 @@ import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiInvocationContex
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -36,8 +34,8 @@ class PlatformHostAuthenticationAdapterTest {
     @AfterEach
     void clearHostThreadContexts() {
         RequestContextHolder.resetRequestAttributes();
-        SecurityContextHolder.clearContext();
         TenantContextHolder.clear();
+        SecurityFrameworkUtils.clear();
         assertThat(RequestContextHolder.getRequestAttributes()).isNull();
         assertThat(SecurityFrameworkUtils.getLoginUser()).isNull();
         assertThat(TenantContextHolder.getTenantId()).isNull();
@@ -135,6 +133,59 @@ class PlatformHostAuthenticationAdapterTest {
                 query.getRequiredPermissions() != null && !query.getRequiredPermissions().isEmpty()));
     }
 
+    @Test
+    void duplicateOrDelegatedAuthorizationNeverReachesInspectionSource() {
+        AiSessionInspectionClient tenant11 = mock(AiSessionInspectionClient.class);
+        AiSessionInspectionClient tenant22 = mock(AiSessionInspectionClient.class);
+        PlatformHostAuthenticationAdapter adapter = adapter(tenant11, tenant22);
+        login(11L, 101L, 1001L, "user-token-11", null);
+        currentRequest().addHeader("Authorization", "Bearer second-token");
+        assertIdentityError(AiIdentityError.VERIFICATION_FAILED, adapter::captureCurrent);
+        verify(tenant11, never()).inspectWithPermissionResult(any());
+
+        clearHostThreadContexts();
+        login(11L, 101L, 1001L, "mcp_jwt_delegated", null);
+        assertIdentityError(AiIdentityError.FORBIDDEN, adapter::captureCurrent);
+        verify(tenant11, never()).inspectWithPermissionResult(any());
+    }
+
+    @Test
+    void expiredLoginOrRemoteSessionCannotBeReused() {
+        AiSessionInspectionClient tenant11 = mock(AiSessionInspectionClient.class);
+        AiSessionInspectionClient tenant22 = mock(AiSessionInspectionClient.class);
+        PlatformHostAuthenticationAdapter adapter = adapter(tenant11, tenant22);
+        login(11L, 101L, 1001L, "user-token-11", null);
+        SecurityFrameworkUtils.getLoginUser().setExpiresTime(LocalDateTime.now().minusSeconds(1));
+        assertIdentityError(AiIdentityError.UNAUTHENTICATED, adapter::captureCurrent);
+        verify(tenant11, never()).inspectWithPermissionResult(any());
+
+        clearHostThreadContexts();
+        login(11L, 101L, 1001L, "user-token-11", null);
+        PlatformInspectionResult expired = identity(11L, 101L, 1001L, true);
+        expired.setExpiresAtMillis(System.currentTimeMillis() - 1);
+        when(tenant11.inspectWithPermissionResult(any())).thenReturn(expired);
+        assertIdentityError(AiIdentityError.UNAUTHENTICATED, adapter::captureCurrent);
+    }
+
+    @Test
+    void administratorRequiresExplicitFreshRemoteAssertion() {
+        AiSessionInspectionClient tenant11 = mock(AiSessionInspectionClient.class);
+        AiSessionInspectionClient tenant22 = mock(AiSessionInspectionClient.class);
+        PlatformHostAuthenticationAdapter adapter = adapter(tenant11, tenant22);
+        login(11L, 101L, 1001L, "user-token-11", null);
+        AiInvocationContext context = new AiInvocationContext("platform", "11", "101", "request-1");
+        PlatformInspectionResult missing = identity(11L, 101L, 1001L, true);
+        when(tenant11.inspectWithPermissionResult(any())).thenReturn(missing);
+        assertIdentityError(AiIdentityError.VERIFICATION_FAILED,
+                () -> adapter.isPlatformAdministrator(context));
+        PlatformInspectionResult denied = identity(11L, 101L, 1001L, true);
+        denied.setPlatformAdministrator(false);
+        when(tenant11.inspectWithPermissionResult(any())).thenReturn(denied);
+        assertThat(adapter.isPlatformAdministrator(context)).isFalse();
+        verify(tenant11, org.mockito.Mockito.atLeastOnce()).inspectWithPermissionResult(
+                org.mockito.ArgumentMatchers.argThat(query -> query.isRequirePlatformAdministrator()));
+    }
+
     private PlatformHostAuthenticationAdapter adapter(AiSessionInspectionClient tenant11,
                                                        AiSessionInspectionClient tenant22) {
         Map<Long, AiSessionInspectionClient> clients = new HashMap<>();
@@ -144,7 +195,11 @@ class PlatformHostAuthenticationAdapterTest {
         properties.setInspections(Arrays.asList(binding(11L), binding(22L)));
         PlatformTenantInspectionRouter router = new PlatformTenantInspectionRouter(properties,
                 item -> clients.get(item.getSubjectTenantId()));
-        return new PlatformHostAuthenticationAdapter(router);
+        return new PlatformHostAuthenticationAdapter(router, nativeLogin(), "platform");
+    }
+
+    private PlatformNativeLoginSource nativeLogin() {
+        return new PlatformNativeLoginSource(getClass().getClassLoader(), PlatformLocalBeanResolverTest.ROOT);
     }
 
     private PlatformTenantInspectionBinding binding(long tenantId) {
@@ -168,13 +223,18 @@ class PlatformHostAuthenticationAdapterTest {
         user.setUserType(UserTypeEnum.ADMIN.getValue());
         user.setAccessTokenId(sessionId);
         user.setExpiresTime(LocalDateTime.now().plusMinutes(5));
-        SecurityFrameworkUtils.setLoginUser(user, request);
+        SecurityFrameworkUtils.setLoginUser(user);
         TenantContextHolder.setTenantId(tenantId);
     }
 
-    private OAuth2SessionInspectionRespDTO identity(long tenantId, long userId, long sessionId,
+    private MockHttpServletRequest currentRequest() {
+        return (MockHttpServletRequest) ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .getRequest();
+    }
+
+    private PlatformInspectionResult identity(long tenantId, long userId, long sessionId,
                                                      boolean permissionsSatisfied) {
-        OAuth2SessionInspectionRespDTO identity = new OAuth2SessionInspectionRespDTO();
+        PlatformInspectionResult identity = new PlatformInspectionResult();
         identity.setTenantId(tenantId);
         identity.setUserId(userId);
         identity.setUserType(UserTypeEnum.ADMIN.getValue());

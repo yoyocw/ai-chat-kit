@@ -1,8 +1,0 @@
-io.github.yoyocw.aichatkit.compat.framework.apilog.config.AiChatKitApiLogAutoConfiguration
-io.github.yoyocw.aichatkit.compat.framework.jackson.config.AiChatKitJacksonAutoConfiguration
-io.github.yoyocw.aichatkit.compat.framework.swagger.config.AiChatKitSwaggerAutoConfiguration
-io.github.yoyocw.aichatkit.compat.framework.web.config.AiChatKitWebAutoConfiguration
-io.github.yoyocw.aichatkit.compat.framework.apilog.config.AiChatKitApiLogRpcAutoConfiguration
-io.github.yoyocw.aichatkit.compat.framework.xss.config.AiChatKitXssAutoConfiguration
-io.github.yoyocw.aichatkit.compat.framework.banner.config.AiChatKitBannerAutoConfiguration
-io.github.yoyocw.aichatkit.compat.framework.encrypt.config.AiChatKitApiEncryptAutoConfiguration

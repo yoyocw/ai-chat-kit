@@ -7,14 +7,12 @@
     <description>可选林业普通 Bearer 宿主适配及受限会话复核，不依赖 AI server 或业务持久化</description>
     <dependencies>
         <dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-contract</artifactId><version>${revision}</version></dependency>
-        <dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-legacy-api</artifactId><version>${revision}</version></dependency>
         <dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-adapter-mcp-jwt-v1</artifactId><version>${revision}</version><optional>true</optional></dependency>
-        <dependency><groupId>io.github.yoyocw</groupId><artifactId>platform-compat-common</artifactId><scope>provided</scope></dependency>
-        <!-- 接入宿主负责提供已有安全与租户框架，不将其 ORM/Redis 等依赖传播给中立引擎。 -->
-        <dependency><groupId>io.github.yoyocw</groupId><artifactId>platform-compat-starter-security</artifactId><scope>provided</scope></dependency>
-        <dependency><groupId>io.github.yoyocw</groupId><artifactId>platform-compat-starter-biz-tenant</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-autoconfigure</artifactId></dependency>
+        <dependency><groupId>org.springframework</groupId><artifactId>spring-aop</artifactId></dependency>
         <dependency><groupId>org.springframework</groupId><artifactId>spring-web</artifactId></dependency>
+        <dependency><groupId>com.squareup.okhttp3</groupId><artifactId>okhttp</artifactId></dependency>
+        <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId></dependency>
         <dependency><groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>io.github.yoyocw</groupId><artifactId>ai-chat-kit-engine</artifactId><version>${revision}</version><scope>test</scope></dependency>

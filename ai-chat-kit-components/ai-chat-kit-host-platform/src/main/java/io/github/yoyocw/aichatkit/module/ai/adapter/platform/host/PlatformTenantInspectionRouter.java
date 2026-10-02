@@ -1,8 +1,8 @@
 package io.github.yoyocw.aichatkit.module.ai.adapter.platform.host;
 
-import io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionReqDTO;
-import io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionRespDTO;
 import io.github.yoyocw.aichatkit.module.ai.adapter.platform.AiSessionInspectionClient;
+import io.github.yoyocw.aichatkit.module.ai.adapter.platform.inspection.PlatformInspectionRequest;
+import io.github.yoyocw.aichatkit.module.ai.adapter.platform.inspection.PlatformInspectionResult;
 import io.github.yoyocw.aichatkit.module.ai.config.AiSessionInspectionProperties;
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityError;
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityException;
@@ -16,8 +16,8 @@ public final class PlatformTenantInspectionRouter implements AutoCloseable {
     private final Map<Long, AiSessionInspectionClient> clients;
     private final AtomicBoolean closed = new AtomicBoolean();
 
-    public PlatformTenantInspectionRouter(PlatformHostInspectionProperties properties) {
-        this(properties, AiSessionInspectionClient::new);
+    public PlatformTenantInspectionRouter(PlatformHostInspectionProperties properties, int adminUserType) {
+        this(properties, binding -> new AiSessionInspectionClient(binding, adminUserType));
     }
 
     PlatformTenantInspectionRouter(PlatformHostInspectionProperties properties,
@@ -44,16 +44,16 @@ public final class PlatformTenantInspectionRouter implements AutoCloseable {
         }
     }
 
-    public OAuth2SessionInspectionRespDTO inspect(OAuth2SessionInspectionReqDTO request) {
+    public PlatformInspectionResult inspect(PlatformInspectionRequest request) {
         return select(request).inspect(request);
     }
 
     /** 与固定租户客户端一致地保留权限布尔值，供普通宿主权限端口判断。 */
-    public OAuth2SessionInspectionRespDTO inspectWithPermissionResult(OAuth2SessionInspectionReqDTO request) {
+    public PlatformInspectionResult inspectWithPermissionResult(PlatformInspectionRequest request) {
         return select(request).inspectWithPermissionResult(request);
     }
 
-    private AiSessionInspectionClient select(OAuth2SessionInspectionReqDTO request) {
+    private AiSessionInspectionClient select(PlatformInspectionRequest request) {
         if (request == null || request.getExpectedTenantId() == null || closed.get()) {
             throw new AiIdentityException(AiIdentityError.FORBIDDEN);
         }

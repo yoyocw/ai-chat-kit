@@ -38,9 +38,7 @@ class PlatformInProcessActivationTest {
                     PlatformInProcessConfiguration.class))
             .withClassLoader(new FilteredClassLoader(
                     "io.github.yoyocw.aichatkit.module.ai.adapter.platform.AiSessionInspectionClient",
-                    "io.github.yoyocw.aichatkit.compat.framework.security.core.oauth2.OAuth2SessionInspectionClient",
-                    "io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionReqDTO",
-                    "io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionRespDTO"));
+                    "io.github.yoyocw.aichatkit.module.ai.adapter.platform.inspection"));
 
     @Test
     void bothSpringRegistrationListsContainInProcessConfiguration() throws Exception {
@@ -96,7 +94,7 @@ class PlatformInProcessActivationTest {
                 .run(context -> {
                     assertThat(context).hasNotFailed();
                     assertThat(ClassUtils.isPresent(
-                            "io.github.yoyocw.aichatkit.compat.framework.security.core.oauth2.OAuth2SessionInspectionClient",
+                            "io.github.yoyocw.aichatkit.module.ai.adapter.platform.inspection.PlatformInspectionTransport",
                             context.getClassLoader())).isFalse();
                     assertThat(context.getBeansOfType(AiInvocationContextPort.class)).hasSize(1);
                     assertThat(context.getBeansOfType(AiHostSessionPort.class)).hasSize(1);
@@ -196,10 +194,8 @@ class PlatformInProcessActivationTest {
     private ApplicationContextRunner withoutMcp() {
         return runner.withClassLoader(new FilteredClassLoader(
                 "io.github.yoyocw.aichatkit.ai.adapter.mcp.v1",
-                "io.github.yoyocw.aichatkit.compat.framework.security.core.oauth2.OAuth2SessionInspectionClient",
                 "io.github.yoyocw.aichatkit.module.ai.adapter.platform.AiSessionInspectionClient",
-                "io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionReqDTO",
-                "io.github.yoyocw.aichatkit.compat.framework.common.biz.system.oauth2.dto.OAuth2SessionInspectionRespDTO"));
+                "io.github.yoyocw.aichatkit.module.ai.adapter.platform.inspection"));
     }
 
     @Configuration(proxyBeanMethods = false)

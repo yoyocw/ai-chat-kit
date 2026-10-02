@@ -20,15 +20,14 @@
         <module>ai-chat-kit-adapter-jdbc</module>
         <module>ai-chat-kit-adapter-mcp-jwt-v1</module>
         <module>ai-chat-kit-adapter-hosted-proxy</module>
+        <module>ai-chat-kit-mcp-jwt</module>
     </modules>
 
     <profiles>
         <profile>
-            <id>platform-compat</id>
+            <id>ai-platform-host</id>
             <modules>
-                <module>ai-chat-kit-legacy-api</module>
                 <module>ai-chat-kit-host-platform</module>
-                <module>ai-chat-kit-legacy-server</module>
             </modules>
         </profile>
         <!-- 若依制品需由锁定官方源码构建；普通林业构建不依赖外部宿主制品。 -->

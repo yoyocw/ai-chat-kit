@@ -16,7 +16,9 @@
 | `ai-chat-kit-mcp-jwt` | 中立 JWT 协议 |
 | `ai-chat-kit-host-platform` | 可选平台宿主接入 |
 
-Maven group 为 `io.github.yoyocw`，核心 Java 包为 `io.github.yoyocw.aichatkit`，兼容源码位于 `io.github.yoyocw.aichatkit.compat`。中立组件不依赖平台安全框架、业务服务或兼容模块。
+Maven group 为 `io.github.yoyocw`，核心 Java 包为 `io.github.yoyocw.aichatkit`。源码集中在 `ai-chat-kit-components`，不再包含平台通用框架、旧业务服务和 FAC。身份适配复用宿主已有认证，不把宿主框架复制进组件。
+
+默认构建 8 个中立组件；平台宿主和若依宿主分别按需构建。独立的契约、存储、Web 和工具适配边界保留，使用方只选择需要的 JAR。
 
 ## 接入
 
@@ -48,17 +50,22 @@ public class Application {
 # 中立组件
 mvn -B -ntp -Drevision=1.2.0-SNAPSHOT clean install
 
-# 包含可选平台兼容组件
-mvn -B -ntp -Pplatform-compat -Drevision=1.2.0-SNAPSHOT clean install
+# 增加平台宿主适配
+mvn -B -ntp -Pai-platform-host -Drevision=1.2.0-SNAPSHOT clean install
+
+# 增加若依宿主适配；先准备匹配的宿主 provided 制品
+mvn -B -ntp -Pai-ruoyi-host -Drevision=1.2.0-SNAPSHOT clean install
 ```
 
-普通组件发布为薄 JAR、sources JAR 和独立 POM。每个 JAR 包含 `META-INF/LICENSE`。兼容模块仅按显式 profile 构建；宿主适配器的 provided 依赖不能重复打入已有宿主。
+普通组件发布为薄 JAR、sources JAR 和独立 POM。每个 JAR 包含 `META-INF/LICENSE`。平台宿主包不需要平台兼容 JAR；若依宿主的 provided 依赖由已有宿主提供。
 
 ```powershell
 ./scripts/component-release/verify-package.ps1 -Repository <Maven仓库目录> -Version 1.2.0-SNAPSHOT
+# 同时验证平台宿主包
+./scripts/component-release/verify-package.ps1 -Repository <Maven仓库目录> -Version 1.2.0-SNAPSHOT -IncludePlatformHost
 ```
 
-第三方依赖由配置的 Maven 仓库解析。可选兼容构建包含地理库时需要 OSGeo 仓库；默认中立组件不依赖这些库。
+第三方依赖由配置的 Maven 仓库解析。主工程不需要地理库、消息队列、服务注册中心或平台 ORM 框架。若依适配所需的宿主资源不代表所有组件的运行依赖。
 
 ## 配置与运行边界
 
@@ -68,4 +75,4 @@ mvn -B -ntp -Pplatform-compat -Drevision=1.2.0-SNAPSHOT clean install
 - 模型、数据库和密钥由部署环境配置，不分发本地环境文件、真实凭据或依赖缓存。
 - 构建和隔离测试不等同真实业务联调或生产部署验收。
 
-本轮命名、兼容方式与验证状态见 [中性命名交付说明](docs/componentization/platform-neutralization.md)。许可见 [LICENSE](LICENSE)。
+本轮结构变化、验证结果及升级事项见 [项目精简结果](docs/componentization/slimming-results.md)。此前 Preview 的制品和验证记录保持不变；主分支更新不等同发布新版本。许可见 [LICENSE](LICENSE)。
