@@ -10,5 +10,8 @@ public interface AiSingleChatBusinessPort {
     AiBusinessSnapshot prepareBusinessContext(boolean mapEnabled, String question, AiInvocationContext context);
     /** @param config 当前应用工具白名单 @param context 可信身份
      * @return 本轮工具Authorization，无工具时可为空；禁止日志/模型正文；失败不得降级固定身份 */
-    String getMcpAuthorization(AiApplicationConfig config, AiInvocationContext context);
+    @Deprecated
+    default String getMcpAuthorization(AiApplicationConfig config, AiInvocationContext context) {
+        throw new UnsupportedOperationException("Use AiInvocationAuthorizationPort for invocation authorization");
+    }
 }

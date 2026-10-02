@@ -44,6 +44,10 @@ public class BailianClient implements AutoCloseable {
     private final BailianGenerationMonitor generationMonitor;
     /** 当前 JVM 内的活动请求；按单聊或群聊消息编号定位取消目标。 */
     private final Map<String, Call> activeCalls = new ConcurrentHashMap<>();
+    /** 登记与停机共用协调状态，确保关闭开始后不会漏入新调用。 */
+    private final Object lifecycleLock = new Object();
+    /** 仅在 lifecycleLock 内访问。 */
+    private boolean closed;
 
     public BailianClient(BailianProperties properties) {
         // 启动时仅要求网络边界有效，允许宿主在未配置调用凭据时完成组件装配。
@@ -167,8 +171,10 @@ public class BailianClient implements AutoCloseable {
                                                    BooleanSupplier stillGenerating) throws IOException {
         Request request = buildRequest(appId, prompt, sessionId, bizParams, callKey.startsWith("single:"));
         Call call = httpClient.newCall(request);
-        if (activeCalls.putIfAbsent(callKey, call) != null) {
-            throw new BailianCallException(BAILIAN_CALL_FAILED, false);
+        synchronized (lifecycleLock) {
+            if (closed || activeCalls.putIfAbsent(callKey, call) != null) {
+                throw new BailianCallException(BAILIAN_CALL_FAILED, false);
+            }
         }
         long startNanos = System.nanoTime();
         try (BailianGenerationWatch watch = generationMonitor == null ? null
@@ -218,13 +224,19 @@ public class BailianClient implements AutoCloseable {
     /** 停机时取消本实例活动请求并释放自有连接池与监测线程，不操作其他宿主资源。 */
     @Override
     public void close() {
-        activeCalls.values().forEach(Call::cancel);
-        if (generationMonitor != null) {
-            generationMonitor.close();
+        synchronized (lifecycleLock) {
+            if (closed) {
+                return;
+            }
+            closed = true;
+            activeCalls.values().forEach(Call::cancel);
+            if (generationMonitor != null) {
+                generationMonitor.close();
+            }
+            httpClient.dispatcher().cancelAll();
+            httpClient.dispatcher().executorService().shutdown();
+            httpClient.connectionPool().evictAll();
         }
-        httpClient.dispatcher().cancelAll();
-        httpClient.dispatcher().executorService().shutdown();
-        httpClient.connectionPool().evictAll();
     }
 
     private Request buildRequest(String appId, String prompt, String sessionId, Map<String, Object> bizParams,

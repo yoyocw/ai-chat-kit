@@ -1,5 +1,7 @@
 package io.github.yoyocw.aichatkit.ai.starter.host;
 
+import io.github.yoyocw.aichatkit.module.ai.contract.execution.AiPreparedExecution;
+
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityError;
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityException;
 
@@ -20,7 +22,7 @@ import java.util.UUID;
 public final class AiHostSingleChatService {
     /** 实时核验宿主身份、会话及固定操作权限。 */
     private final AiHostAuthenticationBridge authenticationBridge;
-    /** Spring 容器中带事务代理的单聊引擎，不能使用手工构造的无事务实例。 */
+    /** Spring 容器中绑定显式事务执行器的单聊引擎，不能使用手工构造的无事务实例。 */
     private final AiChatExecutionService executionService;
 
     /**
@@ -44,6 +46,12 @@ public final class AiHostSingleChatService {
     public StreamingResponseBody send(AiSingleChatRequest request, String expectedActorId) {
         AiHostSession session = authenticationBridge.authorizeCurrent(expectedActorId, AiHostAction.CHAT_SEND);
         return executionService.sendMessageForContext(request, expectedContext(session));
+    }
+
+    /** Authorize and prepare synchronously; consume only after the actual transaction commit. */
+    public AiPreparedExecution prepare(AiSingleChatRequest request, String expectedActorId) {
+        AiHostSession session = authenticationBridge.authorizeCurrent(expectedActorId, AiHostAction.CHAT_SEND);
+        return executionService.prepareMessageForContext(request, expectedContext(session));
     }
 
     /**

@@ -93,6 +93,15 @@ public final class AiTransactionExecutor {
         installFrame();
         TransactionSynchronizationManager.registerSynchronization(new AiTransactionCommitAction(action));
     }
+    /** Registers completion only after proving participation in the selected real AI transaction. */
+    public void afterCompletion(java.util.function.IntConsumer action) {
+        Objects.requireNonNull(action, "action");
+        requireActive();
+        installFrame();
+        TransactionSynchronizationManager.registerSynchronization(new org.springframework.transaction.support.TransactionSynchronization() {
+            @Override public void afterCompletion(int status) { action.accept(status); }
+        });
+    }
     /** 外部不同资源事务第一阶段明确拒绝，不隐式提交跨库部分结果。 */
     private <T> T execute(int propagation, boolean readOnly, int timeout, Supplier<T> work) {
         int isolation = propagation == TransactionDefinition.PROPAGATION_REQUIRES_NEW && readOnly

@@ -15,7 +15,18 @@ import java.util.List;
 public class AiConversationMemoryService {
 
     /** 百炼历史窗口和 Token 估算校准配置。 */
-    private final BailianProperties properties;
+    private final int recentCount;
+    private final int maxTokens;
+    private final int summaryMaxTokens;
+    private final int asciiCharsPerToken;
+    private final int safetyPercent;
+
+    /** 兼容默认模型的历史配置；内部只保留中立预算快照。 */
+    public AiConversationMemoryService(BailianProperties properties) {
+        this(properties.getHistoryRecentMessageCount(), properties.getHistoryMaxTokens(),
+                properties.getHistorySummaryMaxTokens(), properties.getHistoryAsciiCharsPerToken(),
+                properties.getHistoryTokenSafetyPercent());
+    }
 
     /**
      * 构建本轮历史上下文，并在消息超过近期窗口时推进持久化摘要。
@@ -29,7 +40,7 @@ public class AiConversationMemoryService {
                                              List<AiConversationMemoryMessage> messages) {
         List<AiConversationMemoryMessage> ordered = new ArrayList<AiConversationMemoryMessage>(messages);
         ordered.sort(Comparator.comparing(AiConversationMemoryMessage::getId));
-        int recentCount = Math.max(1, properties.getHistoryRecentMessageCount());
+        int recentCount = Math.max(1, this.recentCount);
         int foldEnd = Math.max(0, ordered.size() - recentCount);
         String summary = StringUtils.hasText(storedSummary) ? storedSummary.trim() : "";
         Long cursor = storedCursor;
@@ -45,8 +56,8 @@ public class AiConversationMemoryService {
             recentLines.add(formatRecent(ordered.get(i)));
         }
         int recentTokens = estimateTokens(String.join("\n", recentLines));
-        int summaryBudget = Math.max(0, Math.min(properties.getHistorySummaryMaxTokens(),
-                properties.getHistoryMaxTokens() - recentTokens));
+        int summaryBudget = Math.max(0, Math.min(summaryMaxTokens,
+                maxTokens - recentTokens));
         summary = trimOldestLines(summary, summaryBudget);
         String context = buildContext(summary, recentLines);
         boolean changed = !summary.equals(StringUtils.hasText(storedSummary) ? storedSummary.trim() : "")
@@ -122,8 +133,8 @@ public class AiConversationMemoryService {
                 nonAscii++;
             }
         }
-        int asciiRatio = Math.max(1, properties.getHistoryAsciiCharsPerToken());
+        int asciiRatio = Math.max(1, asciiCharsPerToken);
         int base = nonAscii + (ascii + asciiRatio - 1) / asciiRatio;
-        return (base * (100 + Math.max(0, properties.getHistoryTokenSafetyPercent())) + 99) / 100;
+        return (base * (100 + Math.max(0, safetyPercent)) + 99) / 100;
     }
 }

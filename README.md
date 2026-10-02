@@ -22,7 +22,7 @@ Maven group 为 `io.github.yoyocw`，核心 Java 包为 `io.github.yoyocw.aichat
 
 ## 架构设计
 
-框架按 Spring 的依赖注入、条件装配和模板回调思想演进。当前实现与目标边界、兼容策略见 [整体设计](docs/superpowers/specs/2026-10-02-spring-framework-design.md)，具体改造顺序见 [实施计划](docs/superpowers/plans/2026-10-02-spring-framework-design.md)。方案中的新增接口和重构尚未实施。
+框架采用 Spring 的依赖注入、条件装配和事务回调：模型 SPI 可替换默认适配，中立执行句柄在事务提交后消费，旧发送入口继续兼容。第一阶段重构及 153 项本地测试已完成，迁移范围见 [实施结果](docs/componentization/spring-refactor.md)；整体边界见 [设计](docs/superpowers/specs/2026-10-02-spring-framework-design.md) 与 [计划](docs/superpowers/plans/2026-10-02-spring-framework-design.md)。MVC 与默认模型 SDK 的物理制品拆分留待后续阶段。
 
 ## 接入
 

@@ -7,7 +7,7 @@ import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiInvocationContex
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiConversationStorePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiConversationView;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiMessageView;
-import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianClient;
+import io.github.yoyocw.aichatkit.module.ai.contract.model.AiModelClient;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.Objects;
@@ -20,7 +20,7 @@ public class AiConversationManagementService {
     /** 单群聊共用的管理存储能力。 */
     private final AiConversationStorePort storage;
     /** 仅删除事务提交后取消本实例仍在生成的请求。 */
-    private final BailianClient client;
+    private final AiModelClient client;
     /** 所选AI事务，删除提交后才取消模型调用。 */
     private final AiTransactionExecutor transactions;
 
@@ -72,8 +72,7 @@ public class AiConversationManagementService {
             List<Long> running = storage.delete(context, actualMode, conversationId);
             for (Long messageId : running) {
                 transactions.afterCommit(() -> {
-                    if (actualMode == AiChatMode.SINGLE) { client.cancel(messageId); }
-                    else { client.cancelGroupWorkflow(messageId); }
+                    client.cancel(actualMode, messageId);
                 });
             }
         });

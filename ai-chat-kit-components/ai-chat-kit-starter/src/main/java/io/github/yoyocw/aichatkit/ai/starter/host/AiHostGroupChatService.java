@@ -1,5 +1,8 @@
 package io.github.yoyocw.aichatkit.ai.starter.host;
 
+import io.github.yoyocw.aichatkit.module.ai.contract.execution.AiPreparedExecution;
+import io.github.yoyocw.aichatkit.ai.engine.execution.AiSseEventEncoder;
+
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityError;
 import io.github.yoyocw.aichatkit.module.ai.contract.error.AiIdentityException;
 
@@ -24,7 +27,7 @@ import static io.github.yoyocw.aichatkit.module.ai.enums.AiGroupChatConstants.MA
 public final class AiHostGroupChatService {
     /** 真实用户认证及固定群聊权限边界。 */
     private final AiHostAuthenticationBridge authenticationBridge;
-    /** 由容器事务代理管理的群聊同步入口，不能使用仅流式执行的组件替代。 */
+    /** 由容器管理并绑定真实事务的群聊同步入口，不能使用仅流式执行的组件替代。 */
     private final AiGroupChatExecutionService executionService;
 
     /**
@@ -67,9 +70,15 @@ public final class AiHostGroupChatService {
      * @throws IllegalStateException 宿主认证失败或授权与执行身份不一致
      */
     public StreamingResponseBody send(Long conversationId, String content, String expectedActorId) {
+        AiPreparedExecution prepared = prepare(conversationId, content, expectedActorId);
+        return output -> prepared.consume(new AiSseEventEncoder(output));
+    }
+
+    /** Authorize and prepare synchronously; consume only after the actual transaction commit. */
+    public AiPreparedExecution prepare(Long conversationId, String content, String expectedActorId) {
         requireId(conversationId);
         AiHostSession session = authenticationBridge.authorizeCurrent(expectedActorId, AiHostAction.GROUP_CHAT_SEND);
-        return executionService.sendMessageForContext(conversationId, content, expectedContext(session));
+        return executionService.prepareMessageForContext(conversationId, content, expectedContext(session));
     }
 
     /**

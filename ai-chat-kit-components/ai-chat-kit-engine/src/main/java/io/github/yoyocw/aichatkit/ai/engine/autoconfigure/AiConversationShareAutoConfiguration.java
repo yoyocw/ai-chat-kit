@@ -14,14 +14,12 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import io.github.yoyocw.aichatkit.ai.engine.transaction.AiTransactionExecutor;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /** 分享存储与事务齐备才装配；公开读取不要求创建者登录，创建/撤销仍需真实身份端口。 */
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnBean(AiRuntimeActivation.class)
 @ConditionalOnProperty(prefix = "ai-chat-kit.ai.engine", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties(AiShareProperties.class)
-@EnableTransactionManagement
 @AutoConfigureAfter(name = {"io.github.yoyocw.aichatkit.ai.adapter.jdbc.autoconfigure.AiJdbcStorageAutoConfiguration",
         "org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration"})
 @AutoConfigureBefore(name = "io.github.yoyocw.aichatkit.ai.starter.autoconfigure.AiStarterAutoConfiguration")

@@ -1,14 +1,11 @@
 package io.github.yoyocw.aichatkit.module.ai.service.chat;
 
-import io.github.yoyocw.aichatkit.module.ai.framework.json.AiEngineJson;
 import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianStreamEvent;
 import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianStreamEventType;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -76,13 +73,7 @@ public class AiChatStreamEventWriter {
      * @throws UncheckedIOException 客户端断开或响应写出失败时抛出
      */
     public void write(OutputStream outputStream, String event, Map<String, Object> eventData) {
-        try {
-            String value = "event:" + event + "\ndata:" + AiEngineJson.toJsonString(eventData) + "\n\n";
-            outputStream.write(value.getBytes(StandardCharsets.UTF_8));
-            outputStream.flush();
-        } catch (IOException ex) {
-            throw new UncheckedIOException(ex);
-        }
+        new io.github.yoyocw.aichatkit.ai.engine.execution.AiSseEventEncoder(outputStream).accept(event, eventData);
     }
 
     /**

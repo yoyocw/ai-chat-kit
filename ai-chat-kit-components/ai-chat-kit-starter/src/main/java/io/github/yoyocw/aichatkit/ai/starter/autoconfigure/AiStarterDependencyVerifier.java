@@ -17,7 +17,6 @@ import io.github.yoyocw.aichatkit.module.ai.contract.context.AiGroupAgentCatalog
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiGroupChatPreparePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.authorization.AiHostPermissionPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.identity.AiHostSessionPort;
-import io.github.yoyocw.aichatkit.module.ai.config.BailianProperties;
 import io.github.yoyocw.aichatkit.module.ai.contract.audit.AiExecutionAuditPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.config.AiApplicationConfigPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.config.AiChatMode;
@@ -31,8 +30,7 @@ import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiGroupChatStreamSt
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatCompletionPort;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatPreparePort;
 import io.github.yoyocw.aichatkit.module.ai.contract.storage.AiSingleChatStatePort;
-import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianClient;
-import io.github.yoyocw.aichatkit.module.ai.framework.bailian.BailianGroupOutputParser;
+import io.github.yoyocw.aichatkit.module.ai.contract.model.AiModelClient;
 import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatExecutionService;
 import io.github.yoyocw.aichatkit.module.ai.service.chat.AiChatStreamEventWriter;
 import io.github.yoyocw.aichatkit.module.ai.service.groupchat.AiGroupChatStreamService;
@@ -75,7 +73,7 @@ public final class AiStarterDependencyVerifier implements SmartInitializingSingl
                 AiHostConversationManagementService.class);
         require(missing, AiConversationSharePort.class, AiConversationShareService.class,
                 AiHostConversationShareService.class, AiPublicConversationShareService.class);
-        require(missing, BailianClient.class, BailianProperties.class, AiApplicationConfigPort.class);
+        require(missing, AiModelClient.class, AiApplicationConfigPort.class);
         if (modes.contains(AiChatMode.SINGLE)) { requireSingle(missing); }
         if (modes.contains(AiChatMode.GROUP)) { requireGroup(missing); }
         if (!missing.isEmpty()) {
@@ -87,7 +85,7 @@ public final class AiStarterDependencyVerifier implements SmartInitializingSingl
     private void requireSingle(List<String> missing) {
         require(missing, AiSingleChatStatePort.class, AiInvocationContextPort.class, AiHostExecutionScopePort.class,
                 AiSingleChatCompletionPort.class, AiSingleChatPreparePort.class, AiSingleChatBusinessPort.class,
-                AiSingleResponseDataPort.class, AiExecutionAuditPort.class, AiMessageOriginPort.class,
+                AiSingleResponseDataPort.class, AiExecutionAuditPort.class, AiMessageOriginPort.class, AiInvocationAuthorizationPort.class,
                 AiTransactionExecutor.class, AiChatStreamEventWriter.class, AiChatExecutionService.class,
                 AiHostSingleChatService.class);
     }
@@ -98,7 +96,7 @@ public final class AiStarterDependencyVerifier implements SmartInitializingSingl
                 io.github.yoyocw.aichatkit.ai.starter.host.AiHostGroupAgentService.class);
         require(missing, AiHostExecutionScopePort.class, AiGroupChatStreamStatePort.class,
                 AiGroupResponseDataPort.class, AiExecutionAuditPort.class,
-                BailianGroupOutputParser.class, AiGroupChatStreamService.class,
+                AiGroupChatStreamService.class,
                 AiGroupAgentCatalogPort.class, AiGroupChatPreparePort.class, AiInvocationAuthorizationPort.class,
                 AiMessageOriginPort.class, AiTransactionExecutor.class,
                 AiGroupChatExecutionService.class, AiHostGroupChatService.class);
