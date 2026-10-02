@@ -20,6 +20,10 @@ Maven group 为 `io.github.yoyocw`，核心 Java 包为 `io.github.yoyocw.aichat
 
 默认构建 8 个中立组件；平台宿主和若依宿主分别按需构建。独立的契约、存储、Web 和工具适配边界保留，使用方只选择需要的 JAR。
 
+## 架构设计
+
+框架按 Spring 的依赖注入、条件装配和模板回调思想演进。当前实现与目标边界、兼容策略见 [整体设计](docs/superpowers/specs/2026-10-02-spring-framework-design.md)，具体改造顺序见 [实施计划](docs/superpowers/plans/2026-10-02-spring-framework-design.md)。方案中的新增接口和重构尚未实施。
+
 ## 接入
 
 引入同版本 `ai-chat-kit-starter`、Web/MyBatis-Plus 及所需适配组件，在启动类添加：
